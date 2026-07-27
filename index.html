@@ -214,6 +214,56 @@ body{
 }
 .empty{text-align:center;color:#7593b8;font-size:13px;padding:22px 10px;line-height:1.6}
 .hint{font-size:11px;color:#7593b8;line-height:1.5;text-align:center;padding:2px 6px}
+#sndBtn{
+  flex:0 0 auto;width:30px;height:30px;margin-left:6px;border:0;border-radius:9px;cursor:pointer;
+  background:rgba(255,255,255,.11);color:#cfe2fa;font-size:14px;line-height:1;
+  display:flex;align-items:center;justify-content:center
+}
+#sndBtn:active{transform:scale(.92)}
+
+/* ---------- Заставка ---------- */
+#intro{
+  position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:16px;padding:26px;text-align:center;
+  background:radial-gradient(120% 80% at 50% 18%,#22314e 0%,#0d1524 55%,#070b13 100%);
+  cursor:pointer;overflow:hidden
+}
+#intro.hide{animation:iout .75s ease forwards;pointer-events:none}
+@keyframes iout{to{opacity:0;transform:scale(1.06);visibility:hidden}}
+#intro::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px);
+  opacity:.5;animation:scan 7s linear infinite
+}
+@keyframes scan{to{transform:translateY(3px)}}
+#iBld{
+  font-size:66px;line-height:1;filter:drop-shadow(0 0 22px rgba(120,170,255,.4));
+  animation:sway 5s ease-in-out infinite
+}
+@keyframes sway{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-9px) rotate(2deg)}}
+#iTt{
+  font-size:47px;font-weight:900;letter-spacing:9px;color:#dce9fb;
+  text-shadow:0 0 26px rgba(120,170,255,.55),0 5px 0 rgba(0,0,0,.5);
+  animation:flick 4.5s infinite
+}
+@keyframes flick{
+  0%,96%,100%{opacity:1}
+  97%{opacity:.42}
+  98%{opacity:.92}
+  99%{opacity:.6}
+}
+#iSub{font-size:13.5px;color:#8fa9cc;letter-spacing:2.5px;text-transform:uppercase;line-height:1.8}
+#iSub b{color:#ff8f8f;font-weight:800}
+#iGo{
+  margin-top:6px;border:0;border-radius:13px;cursor:pointer;font-family:inherit;font-weight:900;
+  font-size:17px;padding:15px 44px;color:#101a2b;
+  background:linear-gradient(180deg,#ffe6a2,#f0b64a);box-shadow:0 5px 0 #b8801d,0 0 34px rgba(240,182,74,.34);
+  animation:pul 2.1s ease-in-out infinite
+}
+@keyframes pul{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+#iGo:active{transform:translateY(4px) scale(1);box-shadow:0 1px 0 #b8801d}
+#iHint{font-size:11px;color:#63799a;letter-spacing:.4px}
+
 </style>
 </head>
 <body>
@@ -231,6 +281,7 @@ body{
         <span id="money">500 ₽</span>
         <small id="rep">⭐ 0</small>
       </div>
+      <button id="sndBtn" title="Звук">🔊</button>
     </div>
     <div class="bars">
       <div class="bar">
@@ -374,6 +425,16 @@ body{
     </div>
   </div>
 
+
+  <!-- ЗАСТАВКА -->
+  <div id="intro">
+    <div id="iBld">🏢</div>
+    <div id="iTt">ОФИС</div>
+    <div id="iSub">Понедельник. 9:00.<br><b>Отсюда не увольняются</b></div>
+    <button id="iGo">ВОЙТИ В ОФИС</button>
+    <div id="iHint">🎧 Со звуком страшнее</div>
+  </div>
+
   <div id="toast"></div>
 </div>
 
@@ -387,6 +448,242 @@ function rnd(a,b){return a+Math.random()*(b-a);}
 function ri(a,b){return Math.floor(rnd(a,b+1));}
 function clamp(v,a,b){return v<a?a:(v>b?b:v);}
 function fmt(n){return String(Math.floor(n)).replace(/\B(?=(\d{3})+(?!\d))/g,' ');}
+
+/* ============================================================
+   ЗВУК И МУЗЫКА — всё синтезируется WebAudio, ни одного файла
+   ============================================================ */
+var A={ctx:null,master:null,mus:null,sfx:null,on:true,mode:'amb',step:0,next:0,timer:null,started:false,_nb:null};
+
+function actx(){
+  if(!A.ctx&&A.on){
+    try{
+      var C=window.AudioContext||window.webkitAudioContext;
+      A.ctx=new C();
+      A.master=A.ctx.createGain();A.master.gain.value=.9;A.master.connect(A.ctx.destination);
+      A.mus=A.ctx.createGain();A.mus.gain.value=.0001;A.mus.connect(A.master);
+      A.sfx=A.ctx.createGain();A.sfx.gain.value=.85;A.sfx.connect(A.master);
+    }catch(e){A.on=false;A.ctx=null;}
+  }
+  if(A.ctx&&A.ctx.state==='suspended')A.ctx.resume();
+  return A.ctx;
+}
+function hz(m){return 440*Math.pow(2,(m-69)/12);}
+function noiseBuf(){
+  if(A._nb)return A._nb;
+  var c=A.ctx,len=Math.floor(c.sampleRate*0.7),b=c.createBuffer(1,len,c.sampleRate),d=b.getChannelData(0);
+  for(var i=0;i<len;i++)d[i]=Math.random()*2-1;
+  A._nb=b;return b;
+}
+
+/* ---------- кирпичики музыки ---------- */
+function mBass(f,t,d,type,v){
+  var c=A.ctx,o=c.createOscillator(),o2=c.createOscillator(),g=c.createGain(),lp=c.createBiquadFilter();
+  lp.type='lowpass';lp.frequency.setValueAtTime(420,t);lp.frequency.exponentialRampToValueAtTime(140,t+d);
+  o.type=type||'triangle';o.frequency.value=f;
+  o2.type='sawtooth';o2.frequency.value=f;o2.detune.value=-8;
+  g.gain.setValueAtTime(.0001,t);
+  g.gain.exponentialRampToValueAtTime(v||.20,t+.03);
+  g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(lp);o2.connect(lp);lp.connect(g);g.connect(A.mus);
+  o.start(t);o2.start(t);o.stop(t+d+.05);o2.stop(t+d+.05);
+}
+function mPad(root,t,dur){
+  var iv=[0,3,7,12],c=A.ctx;
+  var lp=c.createBiquadFilter();lp.type='lowpass';
+  lp.frequency.setValueAtTime(300,t);
+  lp.frequency.linearRampToValueAtTime(760,t+dur*.45);
+  lp.frequency.linearRampToValueAtTime(240,t+dur);
+  var g=c.createGain();
+  g.gain.setValueAtTime(.0001,t);
+  g.gain.exponentialRampToValueAtTime(.055,t+1.2);
+  g.gain.setValueAtTime(.055,t+dur*.7);
+  g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  lp.connect(g);g.connect(A.mus);
+  for(var i=0;i<iv.length;i++){
+    var o=c.createOscillator();
+    o.type='sawtooth';o.frequency.value=hz(root+12+iv[i]);
+    o.detune.value=(i%2?7:-7)+(i*2);
+    o.connect(lp);o.start(t);o.stop(t+dur+.1);
+  }
+}
+function mBell(f,t,d,v){
+  var c=A.ctx,o=c.createOscillator(),o2=c.createOscillator(),g=c.createGain();
+  o.type='sine';o.frequency.value=f;
+  o2.type='sine';o2.frequency.value=f*2.76;   /* негармоничный обертон — колокольная жуть */
+  var g2=c.createGain();g2.gain.value=.28;
+  g.gain.setValueAtTime(.0001,t);
+  g.gain.exponentialRampToValueAtTime(v||.07,t+.01);
+  g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g);o2.connect(g2);g2.connect(g);g.connect(A.mus);
+  o.start(t);o2.start(t);o.stop(t+d+.05);o2.stop(t+d+.05);
+}
+function mThump(t,v){
+  var c=A.ctx,o=c.createOscillator(),g=c.createGain();
+  o.type='sine';
+  o.frequency.setValueAtTime(96,t);
+  o.frequency.exponentialRampToValueAtTime(34,t+.19);
+  g.gain.setValueAtTime(v||.4,t);
+  g.gain.exponentialRampToValueAtTime(.0001,t+.26);
+  o.connect(g);g.connect(A.mus);o.start(t);o.stop(t+.3);
+}
+function mHiss(t,d,v,hp){
+  var c=A.ctx,s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();
+  s.buffer=noiseBuf();f.type='highpass';f.frequency.value=hp||2500;
+  g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  s.connect(f);f.connect(g);g.connect(A.mus);s.start(t);s.stop(t+d+.05);
+}
+function mSnare(t){
+  var c=A.ctx,s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();
+  s.buffer=noiseBuf();f.type='bandpass';f.frequency.value=1900;f.Q.value=.8;
+  g.gain.setValueAtTime(.16,t);g.gain.exponentialRampToValueAtTime(.0001,t+.16);
+  s.connect(f);f.connect(g);g.connect(A.mus);s.start(t);s.stop(t+.2);
+}
+function mStab(t){
+  var c=A.ctx,g=c.createGain(),lp=c.createBiquadFilter();
+  lp.type='lowpass';lp.frequency.setValueAtTime(2400,t);lp.frequency.exponentialRampToValueAtTime(500,t+.5);
+  g.gain.setValueAtTime(.0001,t);
+  g.gain.exponentialRampToValueAtTime(.075,t+.015);
+  g.gain.exponentialRampToValueAtTime(.0001,t+.55);
+  lp.connect(g);g.connect(A.mus);
+  [57,60,63].forEach(function(n,i){    /* уменьшённое трезвучие — тревога */
+    var o=c.createOscillator();o.type='sawtooth';o.frequency.value=hz(n);
+    o.detune.value=i*6-6;o.connect(lp);o.start(t);o.stop(t+.6);
+  });
+}
+
+/* ---------- секвенсор ---------- */
+function schedStep(i,t){
+  if(A.mode==='fight'){
+    var s=i%16;
+    var pat=[33,33,36,33, 34,33,36,38, 33,33,36,33, 41,40,38,36];
+    mBass(hz(pat[s]),t,.13,'sawtooth',.15);
+    if(s%4===0)mThump(t,.42);
+    if(s===4||s===12)mSnare(t);
+    if(s%2===1)mHiss(t,.035,.012,6500);
+    if(s===0||s===8)mStab(t);
+    if(s===14)mBell(hz(80),t,.9,.05);
+    return;
+  }
+  /* ambient: медленная офисная тревога */
+  var st=i%16,bar=Math.floor(i/16)%4;
+  var roots=[33,33,34,29];              /* A1 A1 Bb1 F1 — фригийский мрак */
+  var root=roots[bar];
+  if(st===0){
+    mBass(hz(root),t,2.6,'triangle',.18);
+    mPad(root,t,4.9);
+    mThump(t,.42);
+  }
+  if(st===6)mThump(t,.24);              /* второй удар сердца */
+  if(st===11&&bar%2===1)mHiss(t,.45,.022,3200);
+  var mel=[-1,-1,-1,69,-1,-1,-1,72,-1,-1,71,-1,-1,-1,68,-1];
+  if((bar===1||bar===3)&&mel[st]>0)mBell(hz(mel[st]-(bar===3?1:0)),t,1.7,.055);
+}
+function schedTick(){
+  if(!A.ctx)return;
+  var dur=A.mode==='fight'?.150:.3125;
+  var horizon=A.ctx.currentTime+.35;
+  var guard=0;
+  while(A.next<horizon&&guard++<40){
+    schedStep(A.step,A.next);
+    A.next+=dur;A.step++;
+  }
+}
+function musVol(){return A.mode==='fight'?.30:.20;}
+function startMusic(mode){
+  if(!actx()||!A.on)return;
+  A.mode=mode||'amb';
+  if(A.timer)return;
+  A.step=0;A.next=A.ctx.currentTime+.12;
+  var g=A.mus.gain,t=A.ctx.currentTime;
+  g.cancelScheduledValues(t);g.setValueAtTime(.0001,t);
+  g.exponentialRampToValueAtTime(musVol(),t+2.4);   /* зловещее нарастание */
+  A.timer=setInterval(schedTick,60);
+}
+function stopMusic(){
+  if(A.timer){clearInterval(A.timer);A.timer=null;}
+  if(!A.ctx)return;
+  var g=A.mus.gain,t=A.ctx.currentTime;
+  g.cancelScheduledValues(t);g.setValueAtTime(Math.max(.0001,g.value),t);
+  g.exponentialRampToValueAtTime(.0001,t+.4);
+}
+function musicMode(m){
+  if(A.mode===m)return;
+  A.mode=m;A.step=0;
+  if(!A.ctx||!A.timer)return;
+  A.next=A.ctx.currentTime+.05;
+  var g=A.mus.gain,t=A.ctx.currentTime;
+  g.cancelScheduledValues(t);g.setValueAtTime(Math.max(.0001,g.value),t);
+  g.exponentialRampToValueAtTime(musVol(),t+.7);
+}
+
+/* ---------- эффекты ---------- */
+function bp(f,t0,d,type,v,f2){
+  if(!A.ctx)return;
+  var c=A.ctx,o=c.createOscillator(),g=c.createGain(),t=t0||c.currentTime;
+  o.type=type||'sine';o.frequency.setValueAtTime(f,t);
+  if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(.0001,t);
+  g.gain.exponentialRampToValueAtTime(v||.14,t+.008);
+  g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g);g.connect(A.sfx);o.start(t);o.stop(t+d+.03);
+}
+function nz(d,v,hp,t0){
+  if(!A.ctx)return;
+  var c=A.ctx,s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain(),t=t0||c.currentTime;
+  s.buffer=noiseBuf();f.type='highpass';f.frequency.value=hp||1800;
+  g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  s.connect(f);f.connect(g);g.connect(A.sfx);s.start(t);s.stop(t+d+.05);
+}
+function sfx(n){
+  if(!A.on||!actx())return;
+  var c=A.ctx,t=c.currentTime;
+  switch(n){
+    case 'click': bp(620,t,.05,'square',.05); break;
+    case 'tick':  bp(880,t,.045,'square',.06); break;
+    case 'coin':  bp(1050,t,.07,'square',.09);bp(1560,t+.06,.13,'square',.08); break;
+    case 'buy':   bp(500,t,.08,'triangle',.11);bp(760,t+.07,.09,'triangle',.10);bp(1010,t+.15,.16,'triangle',.09); break;
+    case 'equip': bp(340,t,.06,'square',.07);nz(.09,.05,3500,t+.02); break;
+    case 'gulp':  bp(300,t,.11,'sine',.11,150);bp(240,t+.12,.13,'sine',.09,120); break;
+    case 'lvl':   [65,69,72,77].forEach(function(m,i){bp(hz(m),t+i*.09,.3,'triangle',.11);}); break;
+    case 'gift':  [72,76,79,84].forEach(function(m,i){bp(hz(m),t+i*.07,.26,'square',.075);}); break;
+    case 'err':   bp(200,t,.13,'sawtooth',.10,120);bp(150,t+.11,.17,'sawtooth',.09,90); break;
+    case 'hit':   nz(.06,.11,900,t);bp(190,t,.13,'square',.10,70); break;
+    case 'crit':  nz(.11,.17,700,t);bp(260,t,.2,'sawtooth',.15,60);bp(1250,t+.02,.11,'square',.09); break;
+    case 'parry': bp(1500,t,.05,'square',.10);bp(2300,t+.04,.11,'sine',.08);nz(.06,.05,5000,t); break;
+    case 'hurt':  bp(150,t,.19,'sawtooth',.13,58);nz(.09,.07,500,t); break;
+    case 'win':   [69,73,76,81].forEach(function(m,i){bp(hz(m),t+i*.11,.42,'triangle',.13);}); break;
+    case 'lose':  [62,59,55,50].forEach(function(m,i){bp(hz(m),t+i*.17,.5,'sawtooth',.11);}); break;
+    case 'fight': mStabSfx(t); break;
+  }
+}
+function mStabSfx(t){
+  if(!A.ctx)return;
+  var c=A.ctx,g=c.createGain(),lp=c.createBiquadFilter();
+  lp.type='lowpass';lp.frequency.setValueAtTime(2600,t);lp.frequency.exponentialRampToValueAtTime(400,t+.7);
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.02);
+  g.gain.exponentialRampToValueAtTime(.0001,t+.75);
+  lp.connect(g);g.connect(A.sfx);
+  [45,48,51,54].forEach(function(m,i){
+    var o=c.createOscillator();o.type='sawtooth';o.frequency.value=hz(m);
+    o.detune.value=i*5-8;o.connect(lp);o.start(t);o.stop(t+.8);
+  });
+}
+
+/* первый жест пользователя — запускаем музыку (правила автоплея) */
+function audioWake(){
+  if(A.started)return;
+  A.started=true;
+  if(!actx())return;
+  if(P.snd!==false)startMusic('amb');
+}
+function toggleSnd(){
+  P.snd=(P.snd===false);
+  if(P.snd){A.started=true;actx();startMusic(A.mode);}
+  else stopMusic();
+  var b=$('sndBtn');if(b)b.textContent=P.snd?'🔊':'🔇';
+  save();
+  toast(P.snd?'🔊 Звук включён':'🔇 Звук выключен');
+}
 
 /* ============================================================
    VK BRIDGE
@@ -442,7 +739,7 @@ var P={
   coffee:20,nerves:100,tick:Date.now(),
   st:{int:5,pwr:5,cun:5,end:5},pts:0,
   eq:{mug:null,laptop:null,suit:null,chair:null,gadget:null},
-  inv:[],vip:{},daily:0,wins:0,loses:0,tasks:0
+  inv:[],vip:{},daily:0,wins:0,loses:0,tasks:0,snd:true
 };
 
 function save(){
@@ -454,6 +751,7 @@ function merge(o){
   ['name','lvl','xp','money','rep','coffee','nerves','tick','pts','daily','wins','loses','tasks'].forEach(function(k){
     if(typeof o[k]==='number'||typeof o[k]==='string')P[k]=o[k];
   });
+  if(typeof o.snd==='boolean')P.snd=o.snd;
   if(o.st)for(var s in P.st)if(typeof o.st[s]==='number')P.st[s]=o.st[s];
   if(o.eq)for(var e in P.eq)if(o.eq[e]!==undefined)P.eq[e]=o.eq[e];
   if(Array.isArray(o.inv))P.inv=o.inv.slice();
@@ -628,7 +926,7 @@ function addXp(x){
   }
   if(ups){
     var r=rankOf(P.lvl),prev=rankOf(P.lvl-ups);
-    haptic('heavy');
+    haptic('heavy');sfx('lvl');
     if(r.t!==prev.t){
       modal(r.e,'ПОВЫШЕНИЕ!','Поздравляем! Теперь ты <b>'+r.t+'</b>.<br>Уровень <b>'+P.lvl+'</b>, получено <em>'+(ups*3)+'</em> очков характеристик.',[{t:'Отлично!',f:closeModal}]);
     }else{
@@ -642,8 +940,8 @@ function addXp(x){
    ============================================================ */
 function doTask(t){
   regen();
-  if(P.lvl<t.l){toast('🔒 Нужен уровень '+t.l);return;}
-  if(P.coffee<t.c){toast('☕ Не хватает кофе ('+Math.floor(P.coffee)+'/'+t.c+')');return;}
+  if(P.lvl<t.l){sfx('err');toast('🔒 Нужен уровень '+t.l);return;}
+  if(P.coffee<t.c){sfx('err');toast('☕ Не хватает кофе ('+Math.floor(P.coffee)+'/'+t.c+')');return;}
   P.coffee-=t.c;
   var m=t.m,x=t.x,extra='';
   if(P.vip.salary){m=Math.round(m*1.5);}
@@ -655,6 +953,7 @@ function doTask(t){
     extra='<br><b>😣 Нервотрёпка: −'+loss+' нервов.</b>';
   }
   P.money+=m;P.tasks++;
+  sfx('coin');
   addXp(x);
   save();paintAll();
   toast('✅ +'+fmt(m)+' ₽, +'+x+' опыта');
@@ -697,8 +996,8 @@ var FIGHT_COST=4;
 
 function startFight(o){
   regen();
-  if(P.coffee<FIGHT_COST){toast('☕ Нужно '+FIGHT_COST+' кофе');return;}
-  if(P.nerves<nervMax()*0.15){toast('🧠 Нервы на нуле — отдохни или сходи в буфет');return;}
+  if(P.coffee<FIGHT_COST){sfx('err');toast('☕ Нужно '+FIGHT_COST+' кофе');return;}
+  if(P.nerves<nervMax()*0.15){sfx('err');toast('🧠 Нервы на нуле — отдохни или сходи в буфет');return;}
   P.coffee-=FIGHT_COST;
   B={o:o,myHp:Math.round(P.nerves),myMax:nervMax(),opHp:o.hpMax,atk:null,def:null,round:1,over:false};
   $('opAva').textContent=o.e;
@@ -708,6 +1007,7 @@ function startFight(o){
   renderZones();
   paintFight();
   $('fight').classList.add('on');
+  sfx('fight');musicMode('fight');
   save();paintTop();
 }
 
@@ -728,6 +1028,7 @@ function renderZones(){
         var sel=row.querySelectorAll('.zone');
         for(var i=0;i<sel.length;i++)sel[i].classList.remove('sel');
         b.classList.add('sel');
+        sfx('tick');
         if(rid==='atkRow')B.atk=z.id;else B.def=z.id;
         $('goBtn').disabled=!(B.atk&&B.def);
         $('goBtn').textContent=(B.atk&&B.def)?'В АТАКУ!':'Выбери аргумент и защиту';
@@ -765,6 +1066,7 @@ function round(){
   var blocked=(oDef===B.atk);
   var d1=blocked?Math.max(1,Math.round(r1.d*0.22)):r1.d;
   B.opHp=Math.max(0,B.opHp-d1);
+  sfx(blocked?'parry':(r1.crit?'crit':'hit'));
   flog('me','⚔️ Ты: <b>'+za.e+' '+za.n+'</b> — '+
     (blocked?'<span style="color:#ffd76b">парировано!</span> ':'')+
     (r1.crit&&!blocked?'<span style="color:#ffd76b">КРИТ! </span>':'')+
@@ -778,6 +1080,7 @@ function round(){
   var myBlock=(B.def===oAtk);
   var d2=myBlock?Math.max(1,Math.round(r2.d*0.22)):r2.d;
   B.myHp=Math.max(0,B.myHp-d2);
+  setTimeout(function(){sfx(myBlock?'parry':(r2.crit?'crit':'hurt'));},260);
   flog('op','🗯 '+o.n+': <b>'+zo.e+' '+zo.n+'</b> — '+
     (myBlock?'<span style="color:#7fd4ff">ты парировал!</span> ':'')+
     (r2.crit&&!myBlock?'<span style="color:#ff9a9a">КРИТ! </span>':'')+
@@ -806,7 +1109,7 @@ function finish(win){
     P.money+=m;P.rep+=rp;P.wins++;
     addXp(x);
     flog('sys','🏆 Победа! +'+fmt(m)+' ₽, +'+x+' опыта, +'+rp+' авторитета');
-    haptic('heavy');
+    sfx('win');haptic('heavy');
     save();paintAll();
     setTimeout(function(){
       modal('🏆','Ты выиграл спор!',
@@ -820,7 +1123,7 @@ function finish(win){
     P.rep=Math.max(0,P.rep-1);
     addXp(Math.round(o.xp*0.25));
     flog('sys','💀 Ты проиграл спор. −'+fmt(lost)+' ₽');
-    haptic('heavy');
+    sfx('lose');haptic('heavy');
     save();paintAll();
     setTimeout(function(){
       modal('😵','Спор проигран',
@@ -832,6 +1135,7 @@ function finish(win){
 
 function closeFight(){
   $('fight').classList.remove('on');
+  musicMode('amb');
   B=null;rollOpps();paintAll();
 }
 
@@ -850,24 +1154,27 @@ function paintFight(){
 var shopTab='mug';
 
 function buyItem(it){
-  if(P.lvl<it.l){toast('🔒 Нужен уровень '+it.l);return;}
+  if(P.lvl<it.l){sfx('err');toast('🔒 Нужен уровень '+it.l);return;}
   if(P.inv.indexOf(it.id)>=0){equip(it);return;}
-  if(P.money<it.p){toast('💸 Не хватает '+fmt(it.p-P.money)+' ₽');return;}
+  if(P.money<it.p){sfx('err');toast('💸 Не хватает '+fmt(it.p-P.money)+' ₽');return;}
   P.money-=it.p;P.inv.push(it.id);
+  sfx('buy');
   equip(it);
   toast('🛍 Куплено: '+it.n);
   haptic('medium');
 }
 function equip(it){
   P.eq[it.sl]=it.id;
+  sfx('equip');
   P.nerves=Math.min(P.nerves,nervMax());
   save();paintAll();
   toast('✅ Надето: '+it.n);
 }
 function buyBuf(b){
-  if(P.money<b.p){toast('💸 Не хватает денег');return;}
+  if(P.money<b.p){sfx('err');toast('💸 Не хватает денег');return;}
   regen();
   P.money-=b.p;b.f();
+  sfx('gulp');
   save();paintAll();
   toast(b.e+' '+b.d);
   haptic('light');
@@ -896,7 +1203,7 @@ function grantVip(v,demo){
   else P.vip[v.id]=true;
   if(v.id==='coffee_max')P.coffee=Math.min(coffMax(),P.coffee+15);
   save();paintAll();renderVip();
-  haptic('medium');
+  sfx('gift');haptic('medium');
   modal(v.e,(demo?'Демо: ':'')+v.n,v.d,[{t:'Спасибо!',f:closeModal}]);
 }
 
@@ -905,10 +1212,11 @@ function grantVip(v,demo){
    ============================================================ */
 function today(){var d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();}
 function daily(){
-  if(P.daily===today()){toast('🎁 Сегодня бонус уже получен');return;}
+  if(P.daily===today()){sfx('err');toast('🎁 Сегодня бонус уже получен');return;}
   P.daily=today();
   var m=300+P.lvl*120;
   P.money+=m;P.coffee=coffMax();P.nerves=nervMax();
+  sfx('gift');
   save();paintAll();
   modal('🎁','Бонус за вход','Начислено <b>'+fmt(m)+' ₽</b>.<br>Кофе и нервы полностью восстановлены!',[{t:'За работу',f:closeModal}]);
   haptic('medium');
@@ -948,7 +1256,7 @@ function renderStats(){
       if(P.pts<=0)return;
       P.pts--;P.st[s.k]++;
       if(s.k==='end')P.nerves=Math.min(nervMax(),P.nerves+8);
-      save();paintAll();haptic('light');
+      sfx('tick');save();paintAll();haptic('light');
     };
     el.appendChild(btn);
     g.appendChild(el);
@@ -1110,19 +1418,23 @@ function go(v){
 }
 (function bindNav(){
   var nb=$('nav').querySelectorAll('button');
-  for(var i=0;i<nb.length;i++)(function(b){b.onclick=function(){go(b.dataset.v);};})(nb[i]);
+  for(var i=0;i<nb.length;i++)(function(b){b.onclick=function(){sfx('click');go(b.dataset.v);};})(nb[i]);
   var sb=$('shopSeg').querySelectorAll('button');
   for(var j=0;j<sb.length;j++)(function(b){
     b.onclick=function(){
       shopTab=b.dataset.s;
       for(var q=0;q<sb.length;q++)sb[q].classList.remove('on');
-      b.classList.add('on');renderShop();
+      b.classList.add('on');sfx('click');renderShop();
     };
   })(sb[j]);
 })();
 
 $('goBtn').onclick=round;
-$('refreshOpp').onclick=function(){rollOpps();toast('🔄 Новые оппоненты');};
+$('sndBtn').onclick=function(e){e.stopPropagation();toggleSnd();};
+['pointerdown','touchstart','keydown'].forEach(function(ev){
+  document.addEventListener(ev,audioWake,{once:false,passive:true});
+});
+$('refreshOpp').onclick=function(){sfx('click');rollOpps();toast('🔄 Новые оппоненты');};
 $('dailyBtn').onclick=daily;
 $('lbBtn').onclick=showLeaderboard;
 $('shareBtn').onclick=share;
@@ -1141,27 +1453,39 @@ if(!P.inv.length){
 }
 rollOpps();
 paintAll();
+$('sndBtn').textContent=P.snd===false?'🔇':'🔊';
 vkInit();
 
 setInterval(function(){regen();},3000);
 setInterval(function(){save();},20000);
 document.addEventListener('visibilitychange',function(){
-  if(document.hidden)save();else{regen();paintAll();}
+  if(document.hidden){save();stopMusic();}
+  else{regen();paintAll();if(A.started&&P.snd!==false)startMusic(A.mode);}
 });
 window.addEventListener('beforeunload',save);
 
-/* приветствие новичка */
-if(P.lvl===1&&P.tasks===0&&P.wins===0){
-  setTimeout(function(){
-    modal('💼','Добро пожаловать в ОФИС!',
-      'Ты — стажёр. Цель — дорасти до <b>CEO 👑</b>.<br><br>'+
-      '💼 <em>Работа</em> — деньги и опыт<br>'+
-      '🗣 <em>Споры</em> — авторитет и трофеи<br>'+
-      '🛒 <em>Магазин</em> — кружки, ноуты, костюмы<br><br>'+
-      'Не забудь забрать 🎁 <b>бонус за вход</b>!',
-      [{t:'За работу!',f:closeModal}]);
-  },600);
+/* ---------- Заставка: запуск музыки по первому касанию ---------- */
+function enterOffice(){
+  var i=$('intro');
+  if(!i||i.classList.contains('hide'))return;
+  audioWake();
+  sfx('fight');            /* зловещий аккорд на входе */
+  i.classList.add('hide');
+  setTimeout(function(){if(i.parentNode)i.parentNode.removeChild(i);},800);
+  if(P.lvl===1&&P.tasks===0&&P.wins===0){
+    setTimeout(function(){
+      modal('💼','Добро пожаловать в ОФИС!',
+        'Ты — стажёр. Цель — дорасти до <b>CEO 👑</b>.<br><br>'+
+        '💼 <em>Работа</em> — деньги и опыт<br>'+
+        '🗣 <em>Споры</em> — авторитет и трофеи<br>'+
+        '🛒 <em>Магазин</em> — кружки, ноуты, костюмы<br><br>'+
+        'Не забудь забрать 🎁 <b>бонус за вход</b>!',
+        [{t:'За работу!',f:closeModal}]);
+    },900);
+  }
 }
+$('iGo').onclick=function(e){e.stopPropagation();enterOffice();};
+$('intro').onclick=enterOffice;
 })();
 </script>
 </body>
