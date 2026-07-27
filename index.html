@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1f3a5f">
+<title>ОФИС 💼 — от стажёра до CEO</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💼</text></svg>">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:#0f1a2b;color:#e8eef7;display:flex;align-items:center;justify-content:center;
+  user-select:none;-webkit-user-select:none;
+}
+#app{
+  position:relative;width:100%;height:100%;max-width:520px;max-height:100vh;overflow:hidden;
+  background:linear-gradient(180deg,#1b2f4d 0%,#16263f 40%,#101d31 100%);display:flex;flex-direction:column;
+}
+
+/* ---------- Шапка ---------- */
+#top{
+  flex:0 0 auto;padding:calc(9px + env(safe-area-inset-top)) 11px 9px;
+  background:linear-gradient(180deg,#22406b,#1b3357);border-bottom:1px solid rgba(255,255,255,.09);
+  box-shadow:0 3px 12px rgba(0,0,0,.3);z-index:3;
+}
+#idRow{display:flex;align-items:center;gap:9px}
+#ava{
+  width:44px;height:44px;border-radius:12px;flex:0 0 auto;
+  background:#2f5285;display:flex;align-items:center;justify-content:center;font-size:25px;
+  border:2px solid #4d80c9;object-fit:cover;overflow:hidden
+}
+#idTx{flex:1;min-width:0}
+#pname{font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#prank{font-size:12px;color:#9fc0e8;margin-top:1px}
+#cash{
+  flex:0 0 auto;text-align:right;font-weight:800;font-size:14px;color:#ffd76b;line-height:1.35
+}
+#cash small{display:block;color:#9fc0e8;font-weight:700;font-size:11.5px}
+
+.bars{display:flex;gap:7px;margin-top:8px}
+.bar{flex:1;background:rgba(0,0,0,.28);border-radius:9px;padding:3px 8px 4px}
+.bar .lb{display:flex;justify-content:space-between;font-size:10.5px;color:#a8c4e6;font-weight:700}
+.bar .tr{height:6px;background:rgba(0,0,0,.35);border-radius:4px;margin-top:3px;overflow:hidden}
+.bar .tr i{display:block;height:100%;border-radius:4px;transition:width .3s}
+#coffFill{background:linear-gradient(90deg,#c98f4a,#f0b866)}
+#nervFill{background:linear-gradient(90deg,#4ec98f,#6be0a8)}
+#xpFill{background:linear-gradient(90deg,#5a9bff,#8fc0ff)}
+
+/* ---------- Контент ---------- */
+#main{flex:1;overflow-y:auto;padding:11px 11px 14px;-webkit-overflow-scrolling:touch}
+.view{display:none;flex-direction:column;gap:9px}
+.view.on{display:flex;animation:fi .2s}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+.panel{
+  background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.035));
+  border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:11px 12px;
+}
+.ttl{font-size:12px;font-weight:800;color:#8fb4e0;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+
+/* статы */
+.stg{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.st{
+  display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.22);
+  border-radius:11px;padding:8px 9px;border:1px solid rgba(255,255,255,.06)
+}
+.st .e{font-size:21px}
+.st .n{flex:1;min-width:0}
+.st .n b{display:block;font-size:16px;line-height:1.1}
+.st .n span{font-size:10.5px;color:#9fc0e8}
+.st .n i{font-style:normal;color:#6be0a8;font-size:12px;font-weight:800}
+.plus{
+  width:27px;height:27px;flex:0 0 auto;border:0;border-radius:8px;cursor:pointer;
+  background:linear-gradient(180deg,#5aa9ff,#3d7fd6);color:#fff;font-size:17px;font-weight:900;
+  box-shadow:0 2px 0 #2b5fa3;display:none
+}
+.plus.on{display:block}
+.plus:active{transform:translateY(2px);box-shadow:none}
+#ptsRow{
+  display:none;margin-bottom:8px;background:rgba(90,169,255,.15);border:1px solid rgba(90,169,255,.35);
+  border-radius:10px;padding:7px 10px;font-size:13px;font-weight:700;color:#a9d0ff;text-align:center
+}
+#ptsRow.on{display:block}
+
+/* списки */
+.card{
+  display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.2);
+  border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:10px;
+}
+.card.lock{opacity:.45}
+.card .ic{font-size:27px;width:38px;text-align:center;flex:0 0 auto}
+.card .tx{flex:1;min-width:0}
+.card .tt{font-weight:800;font-size:14px}
+.card .ds{font-size:11.5px;color:#9fc0e8;line-height:1.45;margin-top:2px}
+.card .ds b{color:#ffd76b}
+.card .ds em{font-style:normal;color:#6be0a8}
+.act{
+  flex:0 0 auto;border:0;border-radius:10px;cursor:pointer;font-family:inherit;
+  font-weight:800;font-size:12.5px;padding:9px 13px;color:#08243f;white-space:nowrap;
+  background:linear-gradient(180deg,#7fd4ff,#46a6e8);box-shadow:0 3px 0 #2b7cb5
+}
+.act:active{transform:translateY(2px);box-shadow:0 1px 0 #2b7cb5}
+.act.gold{background:linear-gradient(180deg,#ffdf8a,#f3ba43);box-shadow:0 3px 0 #c68f21;color:#3d2a00}
+.act.red{background:linear-gradient(180deg,#ff9a9a,#e85f5f);box-shadow:0 3px 0 #b53b3b;color:#3d0000}
+.act.off{background:rgba(255,255,255,.13);color:#8fa8c4;box-shadow:none;cursor:default}
+.act.own{background:rgba(107,224,168,.2);color:#6be0a8;box-shadow:none;cursor:default}
+
+/* сегменты */
+.seg{display:flex;gap:6px;margin-bottom:9px}
+.seg button{
+  flex:1;border:0;border-radius:10px;cursor:pointer;font-family:inherit;font-weight:800;font-size:12px;
+  padding:9px 4px;background:rgba(255,255,255,.08);color:#9fc0e8
+}
+.seg button.on{background:linear-gradient(180deg,#4d8ad6,#3a6cb0);color:#fff}
+
+/* экипировка */
+.eqg{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.slot{
+  aspect-ratio:1;border-radius:11px;background:rgba(0,0,0,.25);border:1px dashed rgba(255,255,255,.16);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:22px;gap:1px
+}
+.slot.f{border-style:solid;border-color:rgba(107,224,168,.4);background:rgba(107,224,168,.09)}
+.slot small{font-size:8px;color:#8fb4e0;line-height:1}
+
+/* ---------- Бой ---------- */
+#fight{position:absolute;inset:0;z-index:20;display:none;flex-direction:column;background:linear-gradient(180deg,#221d3d,#141326)}
+#fight.on{display:flex}
+#fTop{padding:calc(10px + env(safe-area-inset-top)) 12px 10px;background:rgba(0,0,0,.25)}
+.fRow{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.fRow .fa{font-size:30px;width:42px;text-align:center}
+.fRow .fi{flex:1;min-width:0}
+.fRow .fn{font-size:13px;font-weight:800;display:flex;justify-content:space-between;gap:6px}
+.fRow .fn span{color:#9fc0e8;font-weight:700;font-size:12px}
+.hp{height:9px;background:rgba(0,0,0,.4);border-radius:5px;overflow:hidden;margin-top:3px}
+.hp i{display:block;height:100%;border-radius:5px;transition:width .35s}
+#myHp i{background:linear-gradient(90deg,#4ec98f,#6be0a8)}
+#opHp i{background:linear-gradient(90deg,#e85f5f,#ff9a9a)}
+#flog{
+  flex:1;overflow-y:auto;padding:10px 12px;font-size:12.5px;line-height:1.65;color:#c5d6ec
+}
+#flog div{margin-bottom:5px;padding:5px 9px;background:rgba(255,255,255,.05);border-radius:8px;animation:fi .2s}
+#flog div.me{border-left:3px solid #6be0a8}
+#flog div.op{border-left:3px solid #ff9a9a}
+#flog div.sys{border-left:3px solid #ffd76b;color:#ffd76b;font-weight:700}
+#fBot{padding:10px 12px calc(12px + env(safe-area-inset-bottom));background:rgba(0,0,0,.3)}
+.zlab{font-size:10.5px;color:#8fb4e0;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin:0 0 5px}
+.zrow{display:flex;gap:6px;margin-bottom:9px}
+.zone{
+  flex:1;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);border-radius:11px;
+  padding:8px 2px;cursor:pointer;font-family:inherit;color:#c5d6ec;font-weight:800;font-size:10.5px;
+  display:flex;flex-direction:column;align-items:center;gap:2px
+}
+.zone .ze{font-size:19px}
+.zone.sel{border-color:#6be0a8;background:rgba(107,224,168,.18);color:#fff}
+.zrow.def .zone.sel{border-color:#7fd4ff;background:rgba(127,212,255,.18)}
+#goBtn{
+  width:100%;border:0;border-radius:12px;cursor:pointer;font-family:inherit;font-weight:900;font-size:16px;
+  padding:14px;color:#3d2a00;background:linear-gradient(180deg,#ffdf8a,#f3ba43);box-shadow:0 4px 0 #c68f21
+}
+#goBtn:active{transform:translateY(3px);box-shadow:0 1px 0 #c68f21}
+#goBtn:disabled{background:rgba(255,255,255,.12);color:#7f95b0;box-shadow:none}
+
+/* ---------- Нижнее меню ---------- */
+#nav{
+  flex:0 0 auto;display:flex;background:rgba(9,17,29,.96);border-top:1px solid rgba(255,255,255,.09);
+  padding-bottom:env(safe-area-inset-bottom);z-index:3
+}
+#nav button{
+  flex:1;border:0;background:none;cursor:pointer;font-family:inherit;color:#7593b8;
+  padding:8px 2px 9px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:9.5px;font-weight:700
+}
+#nav button .ne{font-size:20px;filter:grayscale(.55);transition:.15s}
+#nav button.on{color:#7fd4ff}
+#nav button.on .ne{filter:none;transform:translateY(-2px)}
+
+/* ---------- Модалки ---------- */
+#modal{
+  position:absolute;inset:0;z-index:30;display:none;align-items:center;justify-content:center;padding:22px;
+  background:rgba(6,12,22,.82);backdrop-filter:blur(5px)
+}
+#modal.on{display:flex;animation:fi .18s}
+#mbox{
+  width:100%;max-width:340px;background:linear-gradient(180deg,#25406a,#1a2c4a);
+  border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:19px 17px;text-align:center;
+  box-shadow:0 18px 50px rgba(0,0,0,.55)
+}
+#mic{font-size:46px;line-height:1}
+#mtt{font-size:19px;font-weight:900;margin-top:7px}
+#mds{font-size:13.5px;color:#b7cded;line-height:1.6;margin-top:7px}
+#mds b{color:#ffd76b}
+#mds em{font-style:normal;color:#6be0a8}
+#mbtns{display:flex;flex-direction:column;gap:7px;margin-top:15px}
+#mbtns button{
+  border:0;border-radius:11px;cursor:pointer;font-family:inherit;font-weight:800;font-size:15px;padding:12px;
+  background:linear-gradient(180deg,#ffdf8a,#f3ba43);color:#3d2a00;box-shadow:0 4px 0 #c68f21
+}
+#mbtns button:active{transform:translateY(3px);box-shadow:0 1px 0 #c68f21}
+#mbtns button.sec{background:rgba(255,255,255,.12);color:#c5d6ec;box-shadow:0 3px 0 rgba(0,0,0,.25)}
+
+#toast{
+  position:absolute;left:50%;bottom:78px;transform:translateX(-50%);z-index:40;pointer-events:none;
+  background:rgba(10,20,34,.95);border:1px solid rgba(127,212,255,.35);color:#e8eef7;
+  padding:10px 17px;border-radius:12px;font-size:13.5px;font-weight:700;opacity:0;max-width:88%;text-align:center;
+  box-shadow:0 8px 24px rgba(0,0,0,.5)
+}
+#toast.on{animation:tst 2.1s ease}
+@keyframes tst{
+  0%{opacity:0;transform:translate(-50%,12px)}
+  12%{opacity:1;transform:translate(-50%,0)}
+  82%{opacity:1}
+  100%{opacity:0;transform:translate(-50%,-8px)}
+}
+.empty{text-align:center;color:#7593b8;font-size:13px;padding:22px 10px;line-height:1.6}
+.hint{font-size:11px;color:#7593b8;line-height:1.5;text-align:center;padding:2px 6px}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ШАПКА -->
+  <div id="top">
+    <div id="idRow">
+      <div id="ava">🧑‍💼</div>
+      <div id="idTx">
+        <div id="pname">Новичок</div>
+        <div id="prank">🐣 Стажёр · ур. 1</div>
+      </div>
+      <div id="cash">
+        <span id="money">500 ₽</span>
+        <small id="rep">⭐ 0</small>
+      </div>
+    </div>
+    <div class="bars">
+      <div class="bar">
+        <div class="lb"><span>☕ Кофе</span><span id="coffTx">20/20</span></div>
+        <div class="tr"><i id="coffFill" style="width:100%"></i></div>
+      </div>
+      <div class="bar">
+        <div class="lb"><span>🧠 Нервы</span><span id="nervTx">100/100</span></div>
+        <div class="tr"><i id="nervFill" style="width:100%"></i></div>
+      </div>
+      <div class="bar">
+        <div class="lb"><span>📈 Опыт</span><span id="xpTx">0/100</span></div>
+        <div class="tr"><i id="xpFill" style="width:0"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- КОНТЕНТ -->
+  <div id="main">
+
+    <!-- ПРОФИЛЬ -->
+    <div class="view on" id="v-prof">
+      <div class="panel">
+        <div class="ttl">Характеристики</div>
+        <div id="ptsRow">Доступно очков: <b id="ptsV">0</b> — распредели их!</div>
+        <div class="stg" id="statGrid"></div>
+      </div>
+      <div class="panel">
+        <div class="ttl">Экипировка</div>
+        <div class="eqg" id="eqGrid"></div>
+      </div>
+      <div class="panel">
+        <div class="ttl">Карьера</div>
+        <div id="careerBox" style="font-size:13px;line-height:1.9;color:#c5d6ec"></div>
+      </div>
+      <div class="panel">
+        <div class="ttl">Ещё</div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <button class="act gold" id="dailyBtn" style="width:100%;padding:12px">🎁 Бонус за вход</button>
+          <button class="act" id="lbBtn" style="width:100%;padding:12px">🏆 Рейтинг сотрудников</button>
+          <button class="act" id="shareBtn" style="width:100%;padding:12px">📣 Похвастаться</button>
+        </div>
+      </div>
+      <div class="hint">Прогресс сохраняется автоматически</div>
+    </div>
+
+    <!-- РАБОТА -->
+    <div class="view" id="v-work">
+      <div class="panel" style="padding:9px 12px">
+        <div style="font-size:12.5px;color:#b7cded;line-height:1.55">
+          💼 Выполняй задачи — получай <b style="color:#ffd76b">деньги</b> и <b style="color:#8fc0ff">опыт</b>.
+          Задачи тратят кофе. Кофе восстанавливается сам: <b style="color:#f0b866">1 ☕ / 90 сек</b>.
+        </div>
+      </div>
+      <div id="taskList" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
+    <!-- СОВЕЩАНИЯ -->
+    <div class="view" id="v-fight">
+      <div class="panel" style="padding:9px 12px">
+        <div style="font-size:12.5px;color:#b7cded;line-height:1.55">
+          🗣 Побеждай в спорах: выбирай <b style="color:#6be0a8">аргумент</b> для атаки и
+          <b style="color:#7fd4ff">контраргумент</b> для защиты. Угадал защиту — урон почти обнулён.
+        </div>
+      </div>
+      <div id="oppList" style="display:flex;flex-direction:column;gap:8px"></div>
+      <button class="act" id="refreshOpp" style="width:100%;padding:11px;margin-top:2px">🔄 Другие оппоненты</button>
+    </div>
+
+    <!-- МАГАЗИН -->
+    <div class="view" id="v-shop">
+      <div class="seg" id="shopSeg">
+        <button data-s="mug" class="on">☕</button>
+        <button data-s="laptop">💻</button>
+        <button data-s="suit">👔</button>
+        <button data-s="chair">🪑</button>
+        <button data-s="gadget">📱</button>
+        <button data-s="buf">🍱</button>
+      </div>
+      <div id="shopList" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
+    <!-- ДОНАТ -->
+    <div class="view" id="v-vip">
+      <div class="panel" style="padding:11px 12px">
+        <div style="font-size:13px;color:#b7cded;line-height:1.6">
+          💎 Плюшки за голоса ВКонтакте. Всё покупается и за игровые деньги —
+          донат просто ускоряет карьеру.
+        </div>
+      </div>
+      <div id="vipList" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div class="hint" id="vipNote"></div>
+    </div>
+
+  </div>
+
+  <!-- НАВИГАЦИЯ -->
+  <div id="nav">
+    <button data-v="prof" class="on"><span class="ne">🧑‍💼</span>Профиль</button>
+    <button data-v="work"><span class="ne">💼</span>Работа</button>
+    <button data-v="fight"><span class="ne">🗣</span>Споры</button>
+    <button data-v="shop"><span class="ne">🛒</span>Магазин</button>
+    <button data-v="vip"><span class="ne">💎</span>VIP</button>
+  </div>
+
+  <!-- БОЙ -->
+  <div id="fight">
+    <div id="fTop">
+      <div class="fRow">
+        <div class="fa" id="opAva">😾</div>
+        <div class="fi">
+          <div class="fn"><b id="opName">Оппонент</b><span id="opHpTx">100/100</span></div>
+          <div class="hp" id="opHp"><i style="width:100%"></i></div>
+        </div>
+      </div>
+      <div class="fRow">
+        <div class="fa" id="myAva">🧑‍💼</div>
+        <div class="fi">
+          <div class="fn"><b>Ты</b><span id="myHpTx">100/100</span></div>
+          <div class="hp" id="myHp"><i style="width:100%"></i></div>
+        </div>
+      </div>
+    </div>
+    <div id="flog"></div>
+    <div id="fBot">
+      <div class="zlab">⚔️ Твой аргумент</div>
+      <div class="zrow atk" id="atkRow"></div>
+      <div class="zlab">🛡 Ждёшь в ответ</div>
+      <div class="zrow def" id="defRow"></div>
+      <button id="goBtn" disabled>Выбери аргумент и защиту</button>
+    </div>
+  </div>
+
+  <!-- МОДАЛКА -->
+  <div id="modal">
+    <div id="mbox">
+      <div id="mic">💼</div>
+      <div id="mtt">Заголовок</div>
+      <div id="mds">Текст</div>
+      <div id="mbtns"></div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+<script>
+(function(){
+'use strict';
+function $(id){return document.getElementById(id);}
+function nop(){}
+function rnd(a,b){return a+Math.random()*(b-a);}
+function ri(a,b){return Math.floor(rnd(a,b+1));}
+function clamp(v,a,b){return v<a?a:(v>b?b:v);}
+function fmt(n){return String(Math.floor(n)).replace(/\B(?=(\d{3})+(?!\d))/g,' ');}
+
+/* ============================================================
+   VK BRIDGE
+   ============================================================ */
+var VK={ready:false};
+var bridge=window.vkBridge||null;
+
+function vkInit(){
+  if(!bridge||!bridge.send)return;
+  try{
+    bridge.send('VKWebAppInit').then(function(){
+      VK.ready=true;
+      bridge.send('VKWebAppGetUserInfo').then(function(u){
+        if(!u)return;
+        if(u.first_name){P.name=u.first_name+' '+(u.last_name||'');P.name=P.name.trim();}
+        if(u.photo_100){
+          var a=$('ava');a.innerHTML='';
+          var im=document.createElement('img');im.src=u.photo_100;
+          im.style.cssText='width:100%;height:100%;object-fit:cover';
+          a.appendChild(im);
+        }
+        paintTop();
+      }).catch(nop);
+      cloudLoad();
+      renderVip();
+    }).catch(nop);
+  }catch(e){}
+}
+function haptic(s){
+  if(VK.ready)bridge.send('VKWebAppTapticImpactOccurred',{style:s||'light'}).catch(nop);
+  else if(navigator.vibrate)navigator.vibrate(s==='heavy'?40:12);
+}
+function showLeaderboard(){
+  if(VK.ready)bridge.send('VKWebAppShowLeaderBoardBox',{user_result:P.rep}).catch(function(){toast('Рейтинг недоступен');});
+  else toast('🏆 Рейтинг доступен только в ВК');
+}
+function share(){
+  var t='Я '+rankOf(P.lvl).t+' в игре «ОФИС» 💼 Уровень '+P.lvl+', авторитет '+P.rep+'. Обгонишь?';
+  if(VK.ready){
+    bridge.send('VKWebAppShowWallPostBox',{message:t}).catch(function(){
+      bridge.send('VKWebAppShare',{link:location.href}).catch(nop);
+    });
+  }else if(navigator.share){navigator.share({text:t,url:location.href}).catch(nop);}
+  else{try{navigator.clipboard.writeText(t+' '+location.href);toast('📋 Скопировано');}catch(e){toast(t);}}
+}
+
+/* ============================================================
+   СОСТОЯНИЕ
+   ============================================================ */
+var SAVE='office_save_v1';
+var P={
+  name:'Новичок',lvl:1,xp:0,money:500,rep:0,
+  coffee:20,nerves:100,tick:Date.now(),
+  st:{int:5,pwr:5,cun:5,end:5},pts:0,
+  eq:{mug:null,laptop:null,suit:null,chair:null,gadget:null},
+  inv:[],vip:{},daily:0,wins:0,loses:0,tasks:0
+};
+
+function save(){
+  try{localStorage.setItem(SAVE,JSON.stringify(P));}catch(e){}
+  if(VK.ready)bridge.send('VKWebAppStorageSet',{key:SAVE,value:JSON.stringify(P)}).catch(nop);
+}
+function merge(o){
+  if(!o||typeof o!=='object')return;
+  ['name','lvl','xp','money','rep','coffee','nerves','tick','pts','daily','wins','loses','tasks'].forEach(function(k){
+    if(typeof o[k]==='number'||typeof o[k]==='string')P[k]=o[k];
+  });
+  if(o.st)for(var s in P.st)if(typeof o.st[s]==='number')P.st[s]=o.st[s];
+  if(o.eq)for(var e in P.eq)if(o.eq[e]!==undefined)P.eq[e]=o.eq[e];
+  if(Array.isArray(o.inv))P.inv=o.inv.slice();
+  if(o.vip)P.vip=o.vip;
+}
+function localLoad(){
+  try{var s=localStorage.getItem(SAVE);if(s)merge(JSON.parse(s));}catch(e){}
+}
+function cloudLoad(){
+  if(!VK.ready)return;
+  bridge.send('VKWebAppStorageGet',{keys:[SAVE]}).then(function(d){
+    try{
+      var kv=(d.keys||[])[0];
+      if(kv&&kv.value){
+        var c=JSON.parse(kv.value);
+        /* облако главнее, если там дальше продвинулись */
+        var mine=P.lvl*100000+P.xp+P.money;
+        var theirs=(c.lvl||1)*100000+(c.xp||0)+(c.money||0);
+        if(theirs>mine){merge(c);regen(true);paintAll();toast('☁️ Прогресс загружен');}
+        else save();
+      }else save();
+    }catch(e){}
+  }).catch(nop);
+}
+
+/* ============================================================
+   СПРАВОЧНИКИ
+   ============================================================ */
+var RANKS=[
+  {l:1, e:'🐣', t:'Стажёр'},      {l:3, e:'🌱', t:'Junior'},
+  {l:5, e:'💼', t:'Middle'},      {l:8, e:'🎯', t:'Senior'},
+  {l:12,e:'👔', t:'Тимлид'},      {l:17,e:'🏆', t:'Руководитель отдела'},
+  {l:23,e:'💎', t:'Директор'},    {l:30,e:'👑', t:'CEO'}
+];
+function rankOf(l){var r=RANKS[0];for(var i=0;i<RANKS.length;i++)if(l>=RANKS[i].l)r=RANKS[i];return r;}
+function nextRank(l){for(var i=0;i<RANKS.length;i++)if(RANKS[i].l>l)return RANKS[i];return null;}
+
+var ZONES=[
+  {id:'fact', e:'📊', n:'Факты',   s:'int', d:'Бьёт интеллектом'},
+  {id:'push', e:'😤', n:'Напор',   s:'pwr', d:'Бьёт давлением'},
+  {id:'joke', e:'😏', n:'Сарказм', s:'cun', d:'Бьёт хитростью'}
+];
+
+var STATS=[
+  {k:'int',e:'🧠',n:'Интеллект',   d:'урон фактами'},
+  {k:'pwr',e:'💪',n:'Напор',       d:'урон давлением'},
+  {k:'cun',e:'😏',n:'Хитрость',    d:'крит и сарказм'},
+  {k:'end',e:'🛡',n:'Стрессоустойчивость',d:'запас нервов'}
+];
+
+var SLOTS=[
+  {k:'mug',   e:'☕',n:'Кружка'},
+  {k:'laptop',e:'💻',n:'Ноутбук'},
+  {k:'suit',  e:'👔',n:'Костюм'},
+  {k:'chair', e:'🪑',n:'Кресло'},
+  {k:'gadget',e:'📱',n:'Гаджет'}
+];
+
+var ITEMS=[
+  /* кружки — напор */
+  {id:'mug1',sl:'mug',e:'🥛',n:'Гранёный стакан',p:0,l:1,b:{pwr:1}},
+  {id:'mug2',sl:'mug',e:'☕',n:'Кружка «Лучший сотрудник»',p:400,l:2,b:{pwr:3,int:1}},
+  {id:'mug3',sl:'mug',e:'🍵',n:'Термокружка',p:1200,l:5,b:{pwr:6,cun:2}},
+  {id:'mug4',sl:'mug',e:'🏺',n:'Кружка «BOSS»',p:3500,l:9,b:{pwr:11,int:3}},
+  {id:'mug5',sl:'mug',e:'🏆',n:'Золотой кубок',p:9000,l:14,b:{pwr:18,cun:5}},
+  {id:'mug6',sl:'mug',e:'🍶',n:'Чаша переговоров',p:22000,l:20,b:{pwr:28,int:8,cun:6}},
+  /* ноутбуки — интеллект */
+  {id:'lap1',sl:'laptop',e:'📟',n:'Старый нетбук',p:0,l:1,b:{int:1}},
+  {id:'lap2',sl:'laptop',e:'💻',n:'Офисный ноут',p:500,l:3,b:{int:4}},
+  {id:'lap3',sl:'laptop',e:'🖥',n:'Игровой ноут',p:1600,l:6,b:{int:8,cun:2}},
+  {id:'lap4',sl:'laptop',e:'🍏',n:'МакБук Про',p:4200,l:10,b:{int:14,cun:3}},
+  {id:'lap5',sl:'laptop',e:'🖲',n:'Рабочая станция',p:11000,l:15,b:{int:22,pwr:4}},
+  {id:'lap6',sl:'laptop',e:'🛸',n:'Квантовый терминал',p:26000,l:21,b:{int:34,cun:8}},
+  /* костюмы — защита */
+  {id:'suit1',sl:'suit',e:'🧶',n:'Свитер с оленями',p:0,l:1,b:{def:1}},
+  {id:'suit2',sl:'suit',e:'👕',n:'Рубашка поло',p:450,l:2,b:{def:4}},
+  {id:'suit3',sl:'suit',e:'👔',n:'Классический костюм',p:1400,l:5,b:{def:9,cun:1}},
+  {id:'suit4',sl:'suit',e:'🤵',n:'Костюм-тройка',p:3800,l:9,b:{def:16,int:2}},
+  {id:'suit5',sl:'suit',e:'🕴',n:'Итальянский люкс',p:10000,l:14,b:{def:26,cun:4}},
+  {id:'suit6',sl:'suit',e:'🦺',n:'Броня переговорщика',p:24000,l:20,b:{def:40,pwr:6}},
+  /* кресла — нервы */
+  {id:'ch1',sl:'chair',e:'🪵',n:'Табуретка',p:0,l:1,b:{end:1}},
+  {id:'ch2',sl:'chair',e:'🪑',n:'Офисный стул',p:400,l:2,b:{end:3}},
+  {id:'ch3',sl:'chair',e:'💺',n:'Кресло с подлокотниками',p:1300,l:5,b:{end:7}},
+  {id:'ch4',sl:'chair',e:'🛋',n:'Эргономичное кресло',p:3600,l:9,b:{end:12,def:3}},
+  {id:'ch5',sl:'chair',e:'👑',n:'Кресло руководителя',p:9500,l:14,b:{end:20,def:6}},
+  {id:'ch6',sl:'chair',e:'🏛',n:'Трон CEO',p:23000,l:20,b:{end:32,def:10}},
+  /* гаджеты — хитрость */
+  {id:'g1',sl:'gadget',e:'📞',n:'Кнопочный телефон',p:0,l:1,b:{cun:1}},
+  {id:'g2',sl:'gadget',e:'📱',n:'Смартфон',p:500,l:3,b:{cun:4}},
+  {id:'g3',sl:'gadget',e:'⌚',n:'Умные часы',p:1500,l:6,b:{cun:8}},
+  {id:'g4',sl:'gadget',e:'🎧',n:'Наушники с шумодавом',p:4000,l:10,b:{cun:13,int:2}},
+  {id:'g5',sl:'gadget',e:'🥽',n:'AR-очки',p:10500,l:15,b:{cun:21,int:4}},
+  {id:'g6',sl:'gadget',e:'🧬',n:'Нейроинтерфейс',p:25000,l:21,b:{cun:33,pwr:6}}
+];
+function item(id){for(var i=0;i<ITEMS.length;i++)if(ITEMS[i].id===id)return ITEMS[i];return null;}
+
+var BUFFET=[
+  {id:'b_cof',e:'☕',n:'Двойной эспрессо',p:200,d:'+10 ☕ кофе',f:function(){P.coffee=Math.min(coffMax(),P.coffee+10);}},
+  {id:'b_en', e:'⚡',n:'Энергетик',      p:120,d:'+5 ☕ кофе',f:function(){P.coffee=Math.min(coffMax(),P.coffee+5);}},
+  {id:'b_eat',e:'🍱',n:'Бизнес-ланч',    p:300,d:'+50% нервов',f:function(){P.nerves=Math.min(nervMax(),P.nerves+Math.round(nervMax()*.5));}},
+  {id:'b_spa',e:'💆',n:'Массаж плеч',    p:700,d:'полное восстановление нервов',f:function(){P.nerves=nervMax();}},
+  {id:'b_vac',e:'🏖',n:'Отгул на день',  p:1500,d:'полный кофе + полные нервы',f:function(){P.coffee=coffMax();P.nerves=nervMax();}}
+];
+
+var TASKS=[
+  {e:'📧',n:'Разобрать почту',        l:1, c:2, m:120,  x:12},
+  {e:'📊',n:'Сделать отчёт',          l:1, c:3, m:210,  x:22},
+  {e:'📞',n:'Созвон с клиентом',      l:3, c:4, m:390,  x:36},
+  {e:'🖨',n:'Починить принтер',       l:4, c:4, m:470,  x:44},
+  {e:'📈',n:'Презентация инвесторам', l:6, c:6, m:820,  x:74},
+  {e:'🌙',n:'Ночной деплой',          l:8, c:7, m:1250, x:105},
+  {e:'🚒',n:'Спасти горящий проект',  l:11,c:9, m:2100, x:180},
+  {e:'🎓',n:'Провести тренинг',       l:14,c:10,m:3300, x:270},
+  {e:'🤝',n:'Слияние компаний',       l:18,c:12,m:5600, x:440},
+  {e:'🏁',n:'Спасти квартальный план',l:24,c:14,m:9200, x:720}
+];
+
+var FOES=[
+  {e:'😾',n:'Вредный коллега'},   {e:'💅',n:'HR-менеджер'},
+  {e:'🧮',n:'Бухгалтер'},         {e:'🖥',n:'Сисадмин'},
+  {e:'🤝',n:'Продажник'},         {e:'🎨',n:'Дизайнер-перфекционист'},
+  {e:'🐤',n:'Джун-выскочка'},     {e:'🔍',n:'Аудитор'},
+  {e:'😡',n:'Токсичный клиент'},  {e:'⚔️',n:'Тимлид конкурентов'},
+  {e:'📋',n:'Проджект-менеджер'}, {e:'🕴',n:'Начальник отдела'},
+  {e:'🦈',n:'Инвестор-акула'},    {e:'👑',n:'Генеральный директор'}
+];
+
+/* ============================================================
+   ПРОИЗВОДНЫЕ
+   ============================================================ */
+function eqBonus(){
+  var b={int:0,pwr:0,cun:0,end:0,def:0};
+  for(var s in P.eq){
+    var it=item(P.eq[s]);
+    if(!it)continue;
+    for(var k in it.b)b[k]=(b[k]||0)+it.b[k];
+  }
+  if(P.vip.suit_vip){b.def+=12;b.int+=6;}
+  return b;
+}
+function S(k){return P.st[k]+(eqBonus()[k]||0);}
+function DEF(){return eqBonus().def;}
+function nervMax(){return 60+S('end')*8;}
+function coffMax(){return 20+(P.lvl-1)*2+(P.vip.coffee_max?15:0);}
+function xpNeed(l){return Math.round(70+l*l*38);}
+function power(){return S('int')+S('pwr')+S('cun')+S('end')+DEF();}
+
+function regen(silent){
+  var now=Date.now();
+  var dt=Math.max(0,now-(P.tick||now));
+  P.tick=now;
+  if(dt<1000)return;
+  var sec=dt/1000;
+  var cSpeed=P.vip.fast_coffee?45:90;               /* сек на 1 кофе */
+  P.coffee=Math.min(coffMax(),P.coffee+sec/cSpeed);
+  P.nerves=Math.min(nervMax(),P.nerves+sec*(nervMax()/600)); /* полное за 10 мин */
+  if(!silent)paintTop();
+}
+
+/* ============================================================
+   ПРОКАЧКА
+   ============================================================ */
+function addXp(x){
+  P.xp+=x;
+  var ups=0;
+  while(P.xp>=xpNeed(P.lvl)){
+    P.xp-=xpNeed(P.lvl);
+    P.lvl++;P.pts+=3;ups++;
+    P.nerves=nervMax();
+    P.coffee=coffMax();
+  }
+  if(ups){
+    var r=rankOf(P.lvl),prev=rankOf(P.lvl-ups);
+    haptic('heavy');
+    if(r.t!==prev.t){
+      modal(r.e,'ПОВЫШЕНИЕ!','Поздравляем! Теперь ты <b>'+r.t+'</b>.<br>Уровень <b>'+P.lvl+'</b>, получено <em>'+(ups*3)+'</em> очков характеристик.',[{t:'Отлично!',f:closeModal}]);
+    }else{
+      modal('📈','Уровень '+P.lvl+'!','Получено <em>'+(ups*3)+'</em> очков характеристик.<br>Кофе и нервы восстановлены.',[{t:'Класс',f:closeModal}]);
+    }
+  }
+}
+
+/* ============================================================
+   ЗАДАЧИ
+   ============================================================ */
+function doTask(t){
+  regen();
+  if(P.lvl<t.l){toast('🔒 Нужен уровень '+t.l);return;}
+  if(P.coffee<t.c){toast('☕ Не хватает кофе ('+Math.floor(P.coffee)+'/'+t.c+')');return;}
+  P.coffee-=t.c;
+  var m=t.m,x=t.x,extra='';
+  if(P.vip.salary){m=Math.round(m*1.5);}
+  var roll=Math.random();
+  if(roll<0.12){m*=2;x*=2;extra='<br><em>🌟 Босс заметил! Награда удвоена.</em>';haptic('medium');}
+  else if(roll<0.22){
+    var loss=Math.round(nervMax()*0.12);
+    P.nerves=Math.max(1,P.nerves-loss);
+    extra='<br><b>😣 Нервотрёпка: −'+loss+' нервов.</b>';
+  }
+  P.money+=m;P.tasks++;
+  addXp(x);
+  save();paintAll();
+  toast('✅ +'+fmt(m)+' ₽, +'+x+' опыта');
+  if(extra)setTimeout(function(){
+    modal(t.e,t.n,'Задача выполнена!<br>Получено: <b>'+fmt(m)+' ₽</b>, <em>'+x+' опыта</em>.'+extra,[{t:'Дальше',f:closeModal}]);
+  },250);
+}
+
+/* ============================================================
+   ОППОНЕНТЫ И БОЙ
+   ============================================================ */
+var opps=[],B=null;
+
+function makeOpp(dl){
+  var f=FOES[ri(0,FOES.length-1)];
+  var lv=Math.max(1,P.lvl+dl);
+  var base=4+lv*1.7;
+  var o={
+    e:f.e,n:f.n,lvl:lv,
+    st:{
+      int:Math.round(base*rnd(.75,1.25)),
+      pwr:Math.round(base*rnd(.75,1.25)),
+      cun:Math.round(base*rnd(.75,1.25)),
+      end:Math.round(base*rnd(.75,1.25))
+    },
+    def:Math.round(lv*1.5*rnd(.6,1.3))
+  };
+  o.hpMax=Math.round(55+o.st.end*7.5);
+  o.money=Math.round((90+lv*75)*rnd(.8,1.3));
+  o.xp=Math.round((22+lv*13)*rnd(.85,1.2));
+  o.rep=Math.max(1,Math.round(lv/2+rnd(0,2)));
+  return o;
+}
+function rollOpps(){
+  opps=[makeOpp(-2),makeOpp(-1),makeOpp(0),makeOpp(1),makeOpp(3)];
+  renderOpps();
+}
+
+var FIGHT_COST=4;
+
+function startFight(o){
+  regen();
+  if(P.coffee<FIGHT_COST){toast('☕ Нужно '+FIGHT_COST+' кофе');return;}
+  if(P.nerves<nervMax()*0.15){toast('🧠 Нервы на нуле — отдохни или сходи в буфет');return;}
+  P.coffee-=FIGHT_COST;
+  B={o:o,myHp:Math.round(P.nerves),myMax:nervMax(),opHp:o.hpMax,atk:null,def:null,round:1,over:false};
+  $('opAva').textContent=o.e;
+  $('opName').textContent=o.n+' · ур.'+o.lvl;
+  $('flog').innerHTML='';
+  flog('sys','🗣 Совещание началось! Оппонент: '+o.n+' (ур. '+o.lvl+')');
+  renderZones();
+  paintFight();
+  $('fight').classList.add('on');
+  save();paintTop();
+}
+
+function flog(cls,txt){
+  var d=document.createElement('div');
+  d.className=cls;d.innerHTML=txt;
+  var L=$('flog');L.appendChild(d);L.scrollTop=L.scrollHeight;
+}
+
+function renderZones(){
+  ['atkRow','defRow'].forEach(function(rid){
+    var row=$(rid);row.innerHTML='';
+    ZONES.forEach(function(z){
+      var b=document.createElement('button');
+      b.className='zone';b.dataset.z=z.id;
+      b.innerHTML='<span class="ze">'+z.e+'</span>'+z.n;
+      b.onclick=function(){
+        var sel=row.querySelectorAll('.zone');
+        for(var i=0;i<sel.length;i++)sel[i].classList.remove('sel');
+        b.classList.add('sel');
+        if(rid==='atkRow')B.atk=z.id;else B.def=z.id;
+        $('goBtn').disabled=!(B.atk&&B.def);
+        $('goBtn').textContent=(B.atk&&B.def)?'В АТАКУ!':'Выбери аргумент и защиту';
+      };
+      row.appendChild(b);
+    });
+  });
+  $('goBtn').disabled=true;
+  $('goBtn').textContent='Выбери аргумент и защиту';
+}
+
+function zone(id){for(var i=0;i<ZONES.length;i++)if(ZONES[i].id===id)return ZONES[i];return ZONES[0];}
+
+function dmgCalc(atkStat,defVal,cun){
+  var base=atkStat*1.7+rnd(0,atkStat*0.8)+3;
+  var red=defVal/(defVal+45);
+  var d=base*(1-red);
+  var crit=Math.random()<clamp(cun/(cun+60),0,.45);
+  if(crit)d*=1.85;
+  return {d:Math.max(1,Math.round(d)),crit:crit};
+}
+
+function round(){
+  if(!B||B.over)return;
+  var o=B.o;
+  var oAtk=ZONES[ri(0,2)].id;
+  var oDef=ZONES[ri(0,2)].id;
+  /* оппонент чуть умнеет с уровнем: иногда угадывает прошлый выбор */
+  if(B.lastAtk&&Math.random()<clamp(o.lvl/40,0,.4))oDef=B.lastAtk;
+  B.lastAtk=B.atk;
+
+  /* --- удар игрока --- */
+  var za=zone(B.atk);
+  var r1=dmgCalc(S(za.s),o.def,S('cun'));
+  var blocked=(oDef===B.atk);
+  var d1=blocked?Math.max(1,Math.round(r1.d*0.22)):r1.d;
+  B.opHp=Math.max(0,B.opHp-d1);
+  flog('me','⚔️ Ты: <b>'+za.e+' '+za.n+'</b> — '+
+    (blocked?'<span style="color:#ffd76b">парировано!</span> ':'')+
+    (r1.crit&&!blocked?'<span style="color:#ffd76b">КРИТ! </span>':'')+
+    '−'+d1+' нервов');
+
+  if(B.opHp<=0){finish(true);return;}
+
+  /* --- удар оппонента --- */
+  var zo=zone(oAtk);
+  var r2=dmgCalc(o.st[zo.s],DEF(),o.st.cun);
+  var myBlock=(B.def===oAtk);
+  var d2=myBlock?Math.max(1,Math.round(r2.d*0.22)):r2.d;
+  B.myHp=Math.max(0,B.myHp-d2);
+  flog('op','🗯 '+o.n+': <b>'+zo.e+' '+zo.n+'</b> — '+
+    (myBlock?'<span style="color:#7fd4ff">ты парировал!</span> ':'')+
+    (r2.crit&&!myBlock?'<span style="color:#ff9a9a">КРИТ! </span>':'')+
+    '−'+d2+' нервов');
+
+  B.round++;
+  paintFight();
+  haptic('light');
+  if(B.myHp<=0){finish(false);return;}
+
+  B.atk=B.def=null;
+  var sel=$('fight').querySelectorAll('.zone');
+  for(var i=0;i<sel.length;i++)sel[i].classList.remove('sel');
+  $('goBtn').disabled=true;
+  $('goBtn').textContent='Выбери аргумент и защиту';
+}
+
+function finish(win){
+  B.over=true;
+  paintFight();
+  P.nerves=Math.max(1,B.myHp);
+  var o=B.o;
+  if(win){
+    var m=o.money,x=o.xp,rp=o.rep;
+    if(P.vip.salary)m=Math.round(m*1.5);
+    P.money+=m;P.rep+=rp;P.wins++;
+    addXp(x);
+    flog('sys','🏆 Победа! +'+fmt(m)+' ₽, +'+x+' опыта, +'+rp+' авторитета');
+    haptic('heavy');
+    save();paintAll();
+    setTimeout(function(){
+      modal('🏆','Ты выиграл спор!',
+        'Оппонент: <b>'+o.n+'</b><br>Получено: <b>'+fmt(m)+' ₽</b>, <em>'+x+' опыта</em>, ⭐ <b>'+rp+'</b> авторитета.',
+        [{t:'Отлично',f:function(){closeModal();closeFight();}}]);
+    },500);
+  }else{
+    P.loses++;
+    var lost=Math.min(P.money,Math.round(o.money*0.35));
+    P.money-=lost;
+    P.rep=Math.max(0,P.rep-1);
+    addXp(Math.round(o.xp*0.25));
+    flog('sys','💀 Ты проиграл спор. −'+fmt(lost)+' ₽');
+    haptic('heavy');
+    save();paintAll();
+    setTimeout(function(){
+      modal('😵','Спор проигран',
+        '<b>'+o.n+'</b> тебя переспорил.<br>Потеряно: <b>'+fmt(lost)+' ₽</b> и ⭐ 1 авторитета.<br>Опыт всё равно засчитан — тренируйся!',
+        [{t:'Ещё повоюем',f:function(){closeModal();closeFight();}}]);
+    },500);
+  }
+}
+
+function closeFight(){
+  $('fight').classList.remove('on');
+  B=null;rollOpps();paintAll();
+}
+
+function paintFight(){
+  if(!B)return;
+  var op=B.opHp/B.o.hpMax*100,mp=B.myHp/B.myMax*100;
+  $('opHp').firstElementChild.style.width=clamp(op,0,100)+'%';
+  $('myHp').firstElementChild.style.width=clamp(mp,0,100)+'%';
+  $('opHpTx').textContent=B.opHp+'/'+B.o.hpMax;
+  $('myHpTx').textContent=B.myHp+'/'+B.myMax;
+}
+
+/* ============================================================
+   МАГАЗИН
+   ============================================================ */
+var shopTab='mug';
+
+function buyItem(it){
+  if(P.lvl<it.l){toast('🔒 Нужен уровень '+it.l);return;}
+  if(P.inv.indexOf(it.id)>=0){equip(it);return;}
+  if(P.money<it.p){toast('💸 Не хватает '+fmt(it.p-P.money)+' ₽');return;}
+  P.money-=it.p;P.inv.push(it.id);
+  equip(it);
+  toast('🛍 Куплено: '+it.n);
+  haptic('medium');
+}
+function equip(it){
+  P.eq[it.sl]=it.id;
+  P.nerves=Math.min(P.nerves,nervMax());
+  save();paintAll();
+  toast('✅ Надето: '+it.n);
+}
+function buyBuf(b){
+  if(P.money<b.p){toast('💸 Не хватает денег');return;}
+  regen();
+  P.money-=b.p;b.f();
+  save();paintAll();
+  toast(b.e+' '+b.d);
+  haptic('light');
+}
+
+/* ============================================================
+   ДОНАТ
+   ============================================================ */
+var VIP=[
+  {id:'salary',   e:'💰',n:'Повышенная зарплата',p:5,d:'Навсегда +50% денег за задачи и победы'},
+  {id:'fast_coffee',e:'⚡',n:'Кофемашина в кабинете',p:3,d:'Кофе восстанавливается вдвое быстрее'},
+  {id:'coffee_max', e:'☕',n:'Большая кружка',p:2,d:'+15 к максимуму кофе'},
+  {id:'suit_vip',  e:'🕶',n:'Костюм от кутюр',p:4,d:'+12 к защите и +6 к интеллекту сверх экипировки'},
+  {id:'pack',      e:'🎁',n:'Стартовый капитал',p:3,d:'Разово: 25 000 ₽ и 10 очков характеристик'}
+];
+function buyVip(v){
+  if(VK.ready){
+    bridge.send('VKWebAppShowOrderBox',{type:'item',item:v.id}).then(function(d){
+      if(d&&(d.success===true||d.status===true||d.status==='success'))grantVip(v);
+      else toast('Покупка отменена');
+    }).catch(function(){toast('Покупка отменена');});
+  }else grantVip(v,true);
+}
+function grantVip(v,demo){
+  if(v.id==='pack'){P.money+=25000;P.pts+=10;}
+  else P.vip[v.id]=true;
+  if(v.id==='coffee_max')P.coffee=Math.min(coffMax(),P.coffee+15);
+  save();paintAll();renderVip();
+  haptic('medium');
+  modal(v.e,(demo?'Демо: ':'')+v.n,v.d,[{t:'Спасибо!',f:closeModal}]);
+}
+
+/* ============================================================
+   ЕЖЕДНЕВНЫЙ БОНУС
+   ============================================================ */
+function today(){var d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();}
+function daily(){
+  if(P.daily===today()){toast('🎁 Сегодня бонус уже получен');return;}
+  P.daily=today();
+  var m=300+P.lvl*120;
+  P.money+=m;P.coffee=coffMax();P.nerves=nervMax();
+  save();paintAll();
+  modal('🎁','Бонус за вход','Начислено <b>'+fmt(m)+' ₽</b>.<br>Кофе и нервы полностью восстановлены!',[{t:'За работу',f:closeModal}]);
+  haptic('medium');
+}
+
+/* ============================================================
+   ОТРИСОВКА
+   ============================================================ */
+function paintTop(){
+  var r=rankOf(P.lvl);
+  $('pname').textContent=P.name||'Новичок';
+  $('prank').textContent=r.e+' '+r.t+' · ур. '+P.lvl;
+  $('money').textContent=fmt(P.money)+' ₽';
+  $('rep').textContent='⭐ '+P.rep;
+  var cm=coffMax(),nm=nervMax(),xn=xpNeed(P.lvl);
+  $('coffTx').textContent=Math.floor(P.coffee)+'/'+cm;
+  $('nervTx').textContent=Math.floor(P.nerves)+'/'+nm;
+  $('xpTx').textContent=Math.floor(P.xp)+'/'+xn;
+  $('coffFill').style.width=clamp(P.coffee/cm*100,0,100)+'%';
+  $('nervFill').style.width=clamp(P.nerves/nm*100,0,100)+'%';
+  $('xpFill').style.width=clamp(P.xp/xn*100,0,100)+'%';
+}
+
+function renderStats(){
+  var g=$('statGrid');g.innerHTML='';
+  var b=eqBonus();
+  STATS.forEach(function(s){
+    var bo=b[s.k]||0;
+    var el=document.createElement('div');
+    el.className='st';
+    el.innerHTML='<div class="e">'+s.e+'</div><div class="n"><b>'+P.st[s.k]+
+      (bo?' <i>+'+bo+'</i>':'')+'</b><span>'+s.n+'</span></div>';
+    var btn=document.createElement('button');
+    btn.className='plus'+(P.pts>0?' on':'');
+    btn.textContent='+';
+    btn.onclick=function(){
+      if(P.pts<=0)return;
+      P.pts--;P.st[s.k]++;
+      if(s.k==='end')P.nerves=Math.min(nervMax(),P.nerves+8);
+      save();paintAll();haptic('light');
+    };
+    el.appendChild(btn);
+    g.appendChild(el);
+  });
+  $('ptsRow').classList.toggle('on',P.pts>0);
+  $('ptsV').textContent=P.pts;
+
+  var eg=$('eqGrid');eg.innerHTML='';
+  SLOTS.forEach(function(sl){
+    var it=item(P.eq[sl.k]);
+    var d=document.createElement('div');
+    d.className='slot'+(it?' f':'');
+    d.innerHTML=(it?it.e:'<span style="opacity:.3">'+sl.e+'</span>')+'<small>'+sl.n+'</small>';
+    d.title=it?it.n:'Пусто';
+    eg.appendChild(d);
+  });
+
+  var nr=nextRank(P.lvl);
+  $('careerBox').innerHTML=
+    '💼 Задач выполнено: <b style="color:#ffd76b">'+P.tasks+'</b><br>'+
+    '🏆 Побед в спорах: <b style="color:#6be0a8">'+P.wins+'</b> · поражений: <b style="color:#ff9a9a">'+P.loses+'</b><br>'+
+    '💪 Боевая мощь: <b style="color:#8fc0ff">'+power()+'</b><br>'+
+    (nr?'📈 Следующая должность: <b>'+nr.e+' '+nr.t+'</b> (ур. '+nr.l+')':'👑 Ты на вершине карьеры!');
+}
+
+function renderTasks(){
+  var L=$('taskList');L.innerHTML='';
+  TASKS.forEach(function(t){
+    var lock=P.lvl<t.l;
+    var c=document.createElement('div');
+    c.className='card'+(lock?' lock':'');
+    var m=P.vip.salary?Math.round(t.m*1.5):t.m;
+    c.innerHTML='<div class="ic">'+t.e+'</div><div class="tx"><div class="tt">'+t.n+
+      '</div><div class="ds">☕ '+t.c+' · <b>+'+fmt(m)+' ₽</b> · <em>+'+t.x+' опыта</em>'+
+      (lock?'<br>🔒 с '+t.l+' уровня':'')+'</div></div>';
+    var b=document.createElement('button');
+    b.className='act'+(lock?' off':'');
+    b.textContent=lock?'🔒':'Взять';
+    if(!lock)b.onclick=function(){doTask(t);};
+    c.appendChild(b);
+    L.appendChild(c);
+  });
+}
+
+function renderOpps(){
+  var L=$('oppList');L.innerHTML='';
+  opps.forEach(function(o){
+    var diff=o.lvl-P.lvl;
+    var col=diff<=-1?'#6be0a8':diff===0?'#ffd76b':'#ff9a9a';
+    var lab=diff<=-1?'полегче':diff===0?'равный':diff<=1?'посложнее':'ОПАСНО';
+    var c=document.createElement('div');
+    c.className='card';
+    c.innerHTML='<div class="ic">'+o.e+'</div><div class="tx"><div class="tt">'+o.n+
+      '</div><div class="ds">Ур. '+o.lvl+' · <span style="color:'+col+'">'+lab+'</span> · 🧠 '+o.hpMax+
+      '<br><b>+'+fmt(P.vip.salary?Math.round(o.money*1.5):o.money)+' ₽</b> · <em>+'+o.xp+' опыта</em> · ⭐ +'+o.rep+'</div></div>';
+    var b=document.createElement('button');
+    b.className='act red';
+    b.innerHTML='Спорить<br><span style="font-size:10px">☕ '+FIGHT_COST+'</span>';
+    b.onclick=function(){startFight(o);};
+    c.appendChild(b);
+    L.appendChild(c);
+  });
+}
+
+function renderShop(){
+  var L=$('shopList');L.innerHTML='';
+  if(shopTab==='buf'){
+    BUFFET.forEach(function(b){
+      var c=document.createElement('div');
+      c.className='card';
+      c.innerHTML='<div class="ic">'+b.e+'</div><div class="tx"><div class="tt">'+b.n+
+        '</div><div class="ds">'+b.d+'</div></div>';
+      var btn=document.createElement('button');
+      btn.className='act gold';
+      btn.textContent=fmt(b.p)+' ₽';
+      btn.onclick=function(){buyBuf(b);};
+      c.appendChild(btn);
+      L.appendChild(c);
+    });
+    return;
+  }
+  var list=ITEMS.filter(function(i){return i.sl===shopTab;});
+  list.forEach(function(it){
+    var owned=P.inv.indexOf(it.id)>=0||it.p===0;
+    var worn=P.eq[it.sl]===it.id;
+    var lock=P.lvl<it.l;
+    var bon=[];
+    for(var k in it.b){
+      var nm={int:'🧠',pwr:'💪',cun:'😏',end:'🛡',def:'🦺'}[k];
+      bon.push(nm+'+'+it.b[k]);
+    }
+    var c=document.createElement('div');
+    c.className='card'+(lock?' lock':'');
+    c.innerHTML='<div class="ic">'+it.e+'</div><div class="tx"><div class="tt">'+it.n+
+      '</div><div class="ds">'+bon.join(' · ')+(lock?'<br>🔒 с '+it.l+' уровня':'')+'</div></div>';
+    var b=document.createElement('button');
+    if(worn){b.className='act own';b.textContent='✓ Надето';}
+    else if(owned){b.className='act';b.textContent='Надеть';b.onclick=function(){equip(it);};}
+    else if(lock){b.className='act off';b.textContent='🔒';}
+    else{b.className='act gold';b.textContent=fmt(it.p)+' ₽';b.onclick=function(){buyItem(it);};}
+    c.appendChild(b);
+    L.appendChild(c);
+  });
+}
+
+function renderVip(){
+  var L=$('vipList');if(!L)return;
+  L.innerHTML='';
+  VIP.forEach(function(v){
+    var owned=v.id!=='pack'&&!!P.vip[v.id];
+    var c=document.createElement('div');
+    c.className='card'+(owned?'':'');
+    c.innerHTML='<div class="ic">'+v.e+'</div><div class="tx"><div class="tt">'+v.n+
+      '</div><div class="ds">'+v.d+'</div></div>';
+    var b=document.createElement('button');
+    if(owned){b.className='act own';b.textContent='✓ Есть';}
+    else{b.className='act gold';b.textContent=v.p+' 🗳';b.onclick=function(){buyVip(v);};}
+    c.appendChild(b);
+    L.appendChild(c);
+  });
+  $('vipNote').textContent=VK.ready
+    ?'Оплата голосами ВКонтакте. Покупки привязаны к профилю.'
+    :'Вне ВКонтакте — демо-режим: плюшки выдаются бесплатно.';
+}
+
+function paintAll(){paintTop();renderStats();renderTasks();renderOpps();renderShop();renderVip();}
+
+/* ============================================================
+   МОДАЛКА / ТОСТ
+   ============================================================ */
+function modal(ic,tt,ds,btns){
+  $('mic').textContent=ic;$('mtt').textContent=tt;$('mds').innerHTML=ds;
+  var B2=$('mbtns');B2.innerHTML='';
+  (btns||[{t:'ОК',f:closeModal}]).forEach(function(b,i){
+    var el=document.createElement('button');
+    el.textContent=b.t;if(i>0)el.className='sec';
+    el.onclick=b.f;B2.appendChild(el);
+  });
+  $('modal').classList.add('on');
+}
+function closeModal(){$('modal').classList.remove('on');}
+var tt=null;
+function toast(t){
+  var el=$('toast');el.textContent=t;
+  el.classList.remove('on');void el.offsetWidth;el.classList.add('on');
+  clearTimeout(tt);tt=setTimeout(function(){el.classList.remove('on');},2200);
+}
+
+/* ============================================================
+   НАВИГАЦИЯ
+   ============================================================ */
+function go(v){
+  var nb=$('nav').querySelectorAll('button');
+  for(var i=0;i<nb.length;i++)nb[i].classList.toggle('on',nb[i].dataset.v===v);
+  ['prof','work','fight','shop','vip'].forEach(function(k){
+    $('v-'+k).classList.toggle('on',k===v);
+  });
+  $('main').scrollTop=0;
+}
+(function bindNav(){
+  var nb=$('nav').querySelectorAll('button');
+  for(var i=0;i<nb.length;i++)(function(b){b.onclick=function(){go(b.dataset.v);};})(nb[i]);
+  var sb=$('shopSeg').querySelectorAll('button');
+  for(var j=0;j<sb.length;j++)(function(b){
+    b.onclick=function(){
+      shopTab=b.dataset.s;
+      for(var q=0;q<sb.length;q++)sb[q].classList.remove('on');
+      b.classList.add('on');renderShop();
+    };
+  })(sb[j]);
+})();
+
+$('goBtn').onclick=round;
+$('refreshOpp').onclick=function(){rollOpps();toast('🔄 Новые оппоненты');};
+$('dailyBtn').onclick=daily;
+$('lbBtn').onclick=showLeaderboard;
+$('shareBtn').onclick=share;
+
+/* ============================================================
+   СТАРТ
+   ============================================================ */
+localLoad();
+regen(true);
+/* стартовая экипировка новичку */
+if(!P.inv.length){
+  ['mug1','lap1','suit1','ch1','g1'].forEach(function(id){
+    P.inv.push(id);var it=item(id);if(it)P.eq[it.sl]=id;
+  });
+  P.nerves=nervMax();P.coffee=coffMax();
+}
+rollOpps();
+paintAll();
+vkInit();
+
+setInterval(function(){regen();},3000);
+setInterval(function(){save();},20000);
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden)save();else{regen();paintAll();}
+});
+window.addEventListener('beforeunload',save);
+
+/* приветствие новичка */
+if(P.lvl===1&&P.tasks===0&&P.wins===0){
+  setTimeout(function(){
+    modal('💼','Добро пожаловать в ОФИС!',
+      'Ты — стажёр. Цель — дорасти до <b>CEO 👑</b>.<br><br>'+
+      '💼 <em>Работа</em> — деньги и опыт<br>'+
+      '🗣 <em>Споры</em> — авторитет и трофеи<br>'+
+      '🛒 <em>Магазин</em> — кружки, ноуты, костюмы<br><br>'+
+      'Не забудь забрать 🎁 <b>бонус за вход</b>!',
+      [{t:'За работу!',f:closeModal}]);
+  },600);
+}
+})();
+</script>
+</body>
+</html>
