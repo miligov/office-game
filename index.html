@@ -368,8 +368,8 @@ body{
     <div class="view" id="v-vip">
       <div class="panel" style="padding:11px 12px">
         <div style="font-size:13px;color:#b7cded;line-height:1.6">
-          💎 Плюшки за голоса ВКонтакте. Всё покупается и за игровые деньги —
-          донат просто ускоряет карьеру.
+          📺 <b>Всё бесплатно.</b> Плюшки открываются за просмотр рекламы —
+          прогресс сохраняется, можно смотреть по ролику в день.
         </div>
       </div>
       <div id="vipList" style="display:flex;flex-direction:column;gap:8px"></div>
@@ -739,7 +739,7 @@ var P={
   coffee:20,nerves:100,tick:Date.now(),
   st:{int:5,pwr:5,cun:5,end:5},pts:0,
   eq:{mug:null,laptop:null,suit:null,chair:null,gadget:null},
-  inv:[],vip:{},daily:0,wins:0,loses:0,tasks:0,snd:true
+  inv:[],vip:{},daily:0,wins:0,loses:0,tasks:0,snd:true,adp:{}
 };
 
 function save(){
@@ -756,6 +756,7 @@ function merge(o){
   if(o.eq)for(var e in P.eq)if(o.eq[e]!==undefined)P.eq[e]=o.eq[e];
   if(Array.isArray(o.inv))P.inv=o.inv.slice();
   if(o.vip)P.vip=o.vip;
+  if(o.adp&&typeof o.adp==='object')P.adp=o.adp;
 }
 function localLoad(){
   try{var s=localStorage.getItem(SAVE);if(s)merge(JSON.parse(s));}catch(e){}
@@ -1183,20 +1184,37 @@ function buyBuf(b){
 /* ============================================================
    ДОНАТ
    ============================================================ */
+/* Плюшки открываются за просмотры рекламы: ad — сколько роликов нужно.
+   Сервер и оплата не нужны — ВК платит вам за показы.               */
 var VIP=[
-  {id:'salary',   e:'💰',n:'Повышенная зарплата',p:5,d:'Навсегда +50% денег за задачи и победы'},
-  {id:'fast_coffee',e:'⚡',n:'Кофемашина в кабинете',p:3,d:'Кофе восстанавливается вдвое быстрее'},
-  {id:'coffee_max', e:'☕',n:'Большая кружка',p:2,d:'+15 к максимуму кофе'},
-  {id:'suit_vip',  e:'🕶',n:'Костюм от кутюр',p:4,d:'+12 к защите и +6 к интеллекту сверх экипировки'},
-  {id:'pack',      e:'🎁',n:'Стартовый капитал',p:3,d:'Разово: 25 000 ₽ и 10 очков характеристик'}
+  {id:'pack',       e:'🎁',n:'Премия от босса', ad:1,rep:true,
+   d:'25 000 ₽ и 10 очков характеристик'},
+  {id:'coffee_max', e:'☕',n:'Большая кружка',   ad:2, d:'Навсегда: +15 к максимуму кофе'},
+  {id:'fast_coffee',e:'⚡',n:'Кофемашина в кабинете',ad:4,d:'Навсегда: кофе копится вдвое быстрее'},
+  {id:'suit_vip',   e:'🕶',n:'Костюм от кутюр',  ad:5, d:'Навсегда: +12 защиты и +6 интеллекта'},
+  {id:'salary',     e:'💰',n:'Повышенная зарплата',ad:7,d:'Навсегда: +50% денег за задачи и победы'}
 ];
-function buyVip(v){
-  if(VK.ready){
-    bridge.send('VKWebAppShowOrderBox',{type:'item',item:v.id}).then(function(d){
-      if(d&&(d.success===true||d.status===true||d.status==='success'))grantVip(v);
-      else toast('Покупка отменена');
-    }).catch(function(){toast('Покупка отменена');});
-  }else grantVip(v,true);
+function adSeen(id){return (P.adp&&P.adp[id])|0;}
+function adNeed(v){return v.ad||1;}
+var adBusy=false;
+/* Реклама за вознаграждение — работает без сервера */
+function watchAd(v){
+  if(!v||adBusy)return;
+  if(!VK.ready){adProgress(v,true);return;}
+  adBusy=true;toast('📺 Загружаем ролик…');
+  bridge.send('VKWebAppShowNativeAds',{ad_format:'reward'}).then(function(d){
+    adBusy=false;
+    if(d&&d.result)adProgress(v);
+    else{sfx('err');toast('Реклама недоступна, попробуй позже');}
+  }).catch(function(){adBusy=false;sfx('err');toast('Реклама недоступна, попробуй позже');});
+}
+function adProgress(v,demo){
+  P.adp=P.adp||{};
+  P.adp[v.id]=adSeen(v.id)+1;
+  var need=adNeed(v),got=P.adp[v.id];
+  if(got>=need){P.adp[v.id]=0;grantVip(v,demo);}
+  else{sfx('coin');haptic('light');save();renderVip();
+    toast('📺 '+got+' / '+need+' — ещё '+(need-got)+' и плюшка твоя');}
 }
 function grantVip(v,demo){
   if(v.id==='pack'){P.money+=25000;P.pts+=10;}
@@ -1204,7 +1222,26 @@ function grantVip(v,demo){
   if(v.id==='coffee_max')P.coffee=Math.min(coffMax(),P.coffee+15);
   save();paintAll();renderVip();
   sfx('gift');haptic('medium');
-  modal(v.e,(demo?'Демо: ':'')+v.n,v.d,[{t:'Спасибо!',f:closeModal}]);
+  modal(v.e,(demo?'Демо: ':'🎉 ')+v.n,v.d+(v.rep?'<br><em>Можно получать повторно</em>':''),
+    [{t:'Спасибо!',f:closeModal}]);
+}
+/* Быстрая награда за ролик */
+function adBonus(){
+  if(adBusy)return;
+  var give=function(){
+    var m=Math.round((400+P.lvl*300)*(P.vip.salary?1.5:1));
+    P.money+=m;P.coffee=coffMax();
+    sfx('gift');haptic('medium');save();paintAll();
+    modal('🎁','Награда за просмотр','Начислено <b>'+fmt(m)+' ₽</b><br>☕ Кофе восстановлен полностью',
+      [{t:'За работу',f:closeModal}]);
+  };
+  if(!VK.ready){give();return;}
+  adBusy=true;toast('📺 Загружаем ролик…');
+  bridge.send('VKWebAppShowNativeAds',{ad_format:'reward'}).then(function(d){
+    adBusy=false;
+    if(d&&d.result)give();
+    else{sfx('err');toast('Реклама недоступна, попробуй позже');}
+  }).catch(function(){adBusy=false;sfx('err');toast('Реклама недоступна, попробуй позже');});
 }
 
 /* ============================================================
@@ -1365,21 +1402,36 @@ function renderShop(){
 function renderVip(){
   var L=$('vipList');if(!L)return;
   L.innerHTML='';
+  /* быстрая награда */
+  var top=document.createElement('div');
+  top.className='card';
+  top.style.background='rgba(255,215,107,.10)';
+  top.innerHTML='<div class="ic">🎁</div><div class="tx"><div class="tt">Быстрая награда</div>'+
+    '<div class="ds">Ролик → деньги и полный кофе. Без ограничений.</div></div>';
+  var tb=document.createElement('button');
+  tb.className='act gold';tb.textContent='📺 Смотреть';
+  tb.onclick=function(){sfx('click');adBonus();};
+  top.appendChild(tb);L.appendChild(top);
+
   VIP.forEach(function(v){
-    var owned=v.id!=='pack'&&!!P.vip[v.id];
+    var owned=!v.rep&&!!P.vip[v.id];
+    var got=adSeen(v.id),need=adNeed(v);
     var c=document.createElement('div');
-    c.className='card'+(owned?'':'');
+    c.className='card';
+    var bar=owned?'':'<br><span style="color:#6be0a8;font-weight:800">'+got+' / '+need+' 📺</span>'+
+      (got?' <span style="opacity:.6">осталось '+(need-got)+'</span>':'');
     c.innerHTML='<div class="ic">'+v.e+'</div><div class="tx"><div class="tt">'+v.n+
-      '</div><div class="ds">'+v.d+'</div></div>';
+      '</div><div class="ds">'+v.d+bar+'</div></div>';
     var b=document.createElement('button');
     if(owned){b.className='act own';b.textContent='✓ Есть';}
-    else{b.className='act gold';b.textContent=v.p+' 🗳';b.onclick=function(){buyVip(v);};}
+    else{b.className='act gold';b.textContent='📺 '+need;
+      b.onclick=function(){sfx('click');watchAd(v);};}
     c.appendChild(b);
     L.appendChild(c);
   });
   $('vipNote').textContent=VK.ready
-    ?'Оплата голосами ВКонтакте. Покупки привязаны к профилю.'
-    :'Вне ВКонтакте — демо-режим: плюшки выдаются бесплатно.';
+    ?'Всё бесплатно: плюшки открываются за просмотр рекламы ВКонтакте.'
+    :'Вне ВКонтакте рекламы нет: плюшки засчитываются сразу, для теста.';
 }
 
 function paintAll(){paintTop();renderStats();renderTasks();renderOpps();renderShop();renderVip();}
