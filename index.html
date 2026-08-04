@@ -349,11 +349,14 @@ body{
 .btn.no,.btn2.no{opacity:.42;filter:saturate(.5)}
 .act{
   border-radius:14px;
-  background:linear-gradient(165deg,rgba(255,255,255,.14),rgba(255,255,255,.05));
-  border:1px solid var(--line);
-  box-shadow:var(--sh1),inset 0 1px 0 rgba(255,255,255,.14);
+  background:linear-gradient(180deg,#6fb4ff,#3f8ae8);
+  border:1px solid rgba(255,255,255,.28);
+  color:#08243f;
+  box-shadow:0 4px 0 #2b6cb0,0 7px 18px rgba(77,141,255,.3),
+             inset 0 1px 0 rgba(255,255,255,.45);
+  text-shadow:0 1px 0 rgba(255,255,255,.35);
 }
-.act:active{transform:scale(.97)}
+.act:active{transform:translateY(3px);box-shadow:0 1px 0 #2b6cb0}
 
 /* ---------- заголовки ---------- */
 h1{
@@ -534,19 +537,26 @@ h2{letter-spacing:-.5px !important;font-weight:900 !important}
 /* ===== ПАУЗА-ВИДЖЕТ =====
    Требование модерации ВК: с телефона должен быть выход в главное
    меню. Кнопка висит поверх игрового слоя, лист-меню — поверх всего. */
+/* Кнопка паузы встроена в шапку (рядом со звуком) и в верхнюю панель
+   боя — она больше НЕ плавает поверх интерфейса и ничего не перекрывает
+   (раньше фиксированная кнопка наезжала на деньги и кнопку звука). */
 #pw{
-  position:fixed;top:calc(8px + env(safe-area-inset-top));
-  right:calc(8px + env(safe-area-inset-right));
-  width:42px;height:42px;border-radius:13px;cursor:pointer;z-index:2147483000;
-  border:1px solid rgba(255,255,255,.26);
-  background:linear-gradient(180deg,rgba(30,34,52,.92),rgba(14,17,28,.94));
-  color:#eaf0ff;font:900 15px/1 -apple-system,Segoe UI,Roboto,sans-serif;
-  letter-spacing:1px;display:none;align-items:center;justify-content:center;
-  box-shadow:0 3px 12px rgba(0,0,0,.5);backdrop-filter:blur(6px);
-  -webkit-backdrop-filter:blur(6px);padding:0;
+  flex:0 0 auto;width:30px;height:30px;margin-left:6px;border:0;border-radius:9px;cursor:pointer;
+  background:rgba(255,255,255,.11);color:#cfe2fa;
+  font:900 13px/1 -apple-system,Segoe UI,Roboto,sans-serif;
+  display:none;align-items:center;justify-content:center;padding:0;
 }
 #pw.on{display:flex}
-#pw:active{transform:translateY(2px)}
+#pw:active{transform:scale(.92)}
+/* кнопка паузы в бою */
+#pwFight{
+  flex:0 0 auto;width:34px;height:30px;border:0;border-radius:9px;cursor:pointer;
+  background:rgba(255,255,255,.14);color:#eaf0ff;
+  font:900 13px/1 -apple-system,Segoe UI,Roboto,sans-serif;
+  display:none;align-items:center;justify-content:center;padding:0;
+}
+#pwFight.on{display:flex}
+#pwFight:active{transform:scale(.92)}
 #pwScr{
   position:fixed;inset:0;z-index:2147483001;display:none;
   align-items:center;justify-content:center;flex-direction:column;gap:12px;
@@ -574,11 +584,60 @@ h2{letter-spacing:-.5px !important;font-weight:900 !important}
   color:#eaf0ff;border:1px solid rgba(255,255,255,.2);font-size:14px;min-height:42px;
 }
 
+/* ============================================================
+   ФИНАЛЬНЫЙ СЛОЙ «ОФИСА»
+   Основные кнопки всегда выглядят активными и кликабельными.
+   Раньше «современный слой» делал все .act-кнопки полупрозрачно-
+   серыми — модератор счёл их задизейбленными. Возвращаем яркий
+   объём. Приглушёнными остаются только осознанные состояния:
+   .off (заблокировано уровнем/ценой), .own (надето), :disabled.
+   ============================================================ */
+.act{
+  background:linear-gradient(180deg,#7fd4ff,#46a6e8) !important;
+  color:#08243f !important;
+  border:1px solid rgba(255,255,255,.3) !important;
+  box-shadow:0 4px 0 #2b7cb5,0 7px 18px rgba(77,141,255,.32),
+             inset 0 1px 0 rgba(255,255,255,.5) !important;
+  border-radius:12px !important;
+  text-shadow:0 1px 0 rgba(255,255,255,.35);
+  min-height:38px;
+}
+.act:active{transform:translateY(3px) !important;box-shadow:0 1px 0 #2b7cb5 !important}
+.act.gold{
+  background:linear-gradient(180deg,#ffdf8a,#f3ba43) !important;
+  color:#3d2a00 !important;
+  box-shadow:0 4px 0 #c68f21,0 7px 18px rgba(243,186,67,.35),
+             inset 0 1px 0 rgba(255,255,255,.5) !important;
+  text-shadow:0 1px 0 rgba(255,255,255,.4);
+}
+.act.gold:active{box-shadow:0 1px 0 #c68f21 !important}
+.act.red{
+  background:linear-gradient(180deg,#ff9a9a,#e85f5f) !important;
+  color:#3d0000 !important;
+  box-shadow:0 4px 0 #b53b3b,inset 0 1px 0 rgba(255,255,255,.45) !important;
+  text-shadow:0 1px 0 rgba(255,255,255,.3);
+}
+.act.red:active{box-shadow:0 1px 0 #b53b3b !important}
+/* осознанно приглушённые состояния — так и должно быть */
+.act.off{
+  background:rgba(255,255,255,.13) !important;color:#8fa8c4 !important;
+  box-shadow:none !important;border:1px solid rgba(255,255,255,.08) !important;
+  text-shadow:none;
+}
+.act.own{
+  background:rgba(107,224,168,.2) !important;color:#6be0a8 !important;
+  box-shadow:none !important;border:1px solid rgba(107,224,168,.32) !important;
+  text-shadow:none;
+}
+/* подпись «заблокировано» под приглушённой кнопкой читается */
+button:disabled,.act.no{
+  filter:saturate(.5);opacity:.62;
+}
+
 </style>
 </head>
 <body>
 <!-- Пауза и выход в главное меню (требование модерации ВК) -->
-<button id="pw" aria-label="Пауза">II</button>
 <div id="pwScr" role="dialog" aria-modal="true" aria-label="Пауза">
   <h3>Пауза</h3>
   <button class="pwGo" id="pwGo">Продолжить</button>
@@ -602,6 +661,7 @@ h2{letter-spacing:-.5px !important;font-weight:900 !important}
         <small id="rep">⭐ 0</small>
       </div>
       <button id="sndBtn" title="Звук">🔊</button>
+      <button id="pw" aria-label="Пауза">II</button>
     </div>
     <div class="bars">
       <div class="bar">
@@ -723,6 +783,9 @@ h2{letter-spacing:-.5px !important;font-weight:900 !important}
           <div class="fn"><b>Ты</b><span id="myHpTx">100/100</span></div>
           <div class="hp" id="myHp"><i style="width:100%"></i></div>
         </div>
+      </div>
+      <div class="fRow" style="justify-content:flex-end;margin-bottom:0">
+        <button id="pwFight" aria-label="Пауза">II</button>
       </div>
     </div>
     <div id="flog"></div>
@@ -1059,7 +1122,10 @@ function paintVibBtns(){
   var on=vibOn();
   var list=document.querySelectorAll('.vibBtn');
   for(var i=0;i<list.length;i++){
-    list[i].textContent=on?'Вибрация: вкл':'Вибрация: выкл';
+    var ico=list[i].getAttribute('data-ico')==='1';
+    list[i].textContent=ico?(on?'\u2707':'\u2205')
+                          :(on?'Вибрация: вкл':'Вибрация: выкл');
+    list[i].title=on?'Вибрация включена':'Вибрация выключена';
     list[i].setAttribute('aria-pressed',on?'true':'false');
   }
 }
@@ -1082,6 +1148,11 @@ function paintVibBtns(){
     b.className=snd.className+' vibBtn';
     b.type='button';
     b.setAttribute('aria-label','Вибрация');
+    /* Если сосед — компактная иконка, подписи не будет: длинный текст
+       ломает шапку. paintVibBtns() учитывает это через data-ico. */
+    if(/\bico\b/.test(snd.className)||(snd.textContent||'').trim().length<=2){
+      b.setAttribute('data-ico','1');
+    }
     b.textContent='Вибрация: вкл';
     snd.parentNode.insertBefore(b,snd.nextSibling);
     b.addEventListener('pointerdown',function(e){
@@ -1112,6 +1183,8 @@ function setPauseHooks(o){
 function pwShow(on){
   var b=document.getElementById('pw');
   if(b)b.classList.toggle('on',!!on);
+  var b2=document.getElementById('pwFight');
+  if(b2)b2.classList.toggle('on',!!on);
 }
 function pwOpen(){
   if(PWID.paused)return;
@@ -1167,6 +1240,7 @@ function pwGuard(){
   }
   function init(){
     tap(document.getElementById('pw'),pwOpen);
+    tap(document.getElementById('pwFight'),pwOpen);
     tap(document.getElementById('pwGo'),pwClose);
     tap(document.getElementById('pwOut'),pwQuit);
     tap(document.getElementById('pwVib'),function(){
